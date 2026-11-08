@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>순공 기록표</title>
+<title>적자생존</title>
 <meta name="theme-color" content="#f7f4ec">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="순공">
+<meta name="apple-mobile-web-app-title" content="적자생존">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -17,7 +17,7 @@
 <style>
 :root{
   --paper:#f7f4ec; --card:#fffdf8; --ink:#1f2420; --sub:#6b6f68; --line:#e4dfd2;
-  --acc:#2f5d50; --acc2:#e7efe9; --warn:#b5651d; --warnbg:#fbefe1; --bad:#a33b3b;
+  --acc:#8a52d1; --acc2:#f1e8fb; --warn:#b5651d; --warnbg:#fbefe1; --bad:#a33b3b;
   --mono:'IBM Plex Mono',ui-monospace,monospace;
 }
 *{box-sizing:border-box}
@@ -31,7 +31,7 @@ h1 small{font-weight:500;color:var(--sub);font-size:12px;margin-left:6px}
 .status.cloud{color:var(--acc);border-color:#bcd3c8}
 .tabs{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:14px}
 .tabs button{flex:1;border:0;background:none;padding:9px 4px;border-radius:9px;font:inherit;font-weight:700;color:var(--sub);cursor:pointer}
-.tabs button.on{background:var(--ink);color:#fff}
+.tabs button.on{background:var(--acc);color:#fff}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 0 rgba(0,0,0,.03)}
 .datebar{display:flex;align-items:center;gap:6px;margin-bottom:12px}
 .datebar .d{flex:1;text-align:center;font-weight:900;font-size:18px}
@@ -56,15 +56,26 @@ h1 small{font-weight:500;color:var(--sub);font-size:12px;margin-left:6px}
 .inbox input{flex:1;min-width:0;font:inherit;font-size:16px;padding:12px 12px;border:2px solid var(--ink);border-radius:12px;background:#fff;outline:none}
 .inbox input:focus{border-color:var(--acc)}
 @keyframes pulse{50%{opacity:.6}}
+.goals .g{display:flex;align-items:center;gap:12px;padding:7px 0}
+.gchk{-webkit-appearance:none;appearance:none;width:32px;height:32px;flex:none;border:2px solid var(--ink);border-radius:10px;background:#fff;margin:0;cursor:pointer;position:relative}
+.gchk:checked{background:var(--acc);border-color:var(--acc)}
+.gchk:checked::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:900}
+.goals .gt{flex:1;min-width:0;font:inherit;font-size:17px;padding:12px 12px;border:2px solid var(--ink);border-radius:12px;background:#fff;outline:none}
+.goals .gt:focus{border-color:var(--acc)}
+.goals .g.done .gt{text-decoration:line-through;color:var(--sub);border-color:var(--line);background:#f1efe8}
+.gcount{font-size:13px;color:var(--sub);font-weight:700}
+.gcount.all{color:var(--acc)}
 .hint{font-size:12px;color:var(--sub);margin-top:8px;line-height:1.6}
 .hint code{font-family:inherit;background:#f1efe8;padding:1px 6px;border-radius:6px;cursor:pointer;white-space:nowrap}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.chip{border:1px solid var(--line);background:#fff;font:inherit;font-size:13px;padding:6px 10px;border-radius:99px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:4px}
+.chip{border:2px solid var(--line);background:#fff;font:inherit;font-size:18px;font-weight:700;min-height:62px;padding:14px 12px;border-radius:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.chip:active{transform:scale(.97);background:var(--acc2)}
+.chip .dot{width:13px;height:13px}
 .fix{display:flex;gap:6px;justify-content:flex-end;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
 .rec .x{border:0;background:none;color:#b9b2a2;font-size:16px;padding:2px 6px;cursor:pointer;border-radius:6px;flex:none}
 .rec .x:hover{color:var(--bad);background:#f6e3e3}
-.chip.end{background:var(--ink);color:#fff;border-color:var(--ink)}
-.chip .st{font-size:10px;color:var(--acc);font-weight:700}
+.chip.end{background:var(--ink);color:#fff;border-color:var(--ink);grid-column:1/-1}
+.chip .st{font-size:14px;color:var(--acc);font-weight:700}
 #preview:empty{display:none}
 .pv{border:2px solid var(--acc);background:var(--acc2);border-radius:14px;padding:12px;margin-top:10px}
 .pv h3{margin:0 0 8px;font-size:14px}
@@ -134,6 +145,7 @@ select,input[type=text],input[type=date],input[type=month],textarea{font:inherit
 .mt{margin-top:10px}.mb0{margin-bottom:0}
 .note{font-size:12px;color:var(--sub);line-height:1.6}
 @media (max-width:520px){
+  .chips{grid-template-columns:repeat(2,1fr)}
   .sum{grid-template-columns:1fr}
   .rec .tm{width:96px;font-size:13px}
   .mstat{grid-template-columns:repeat(2,1fr)}
@@ -143,7 +155,7 @@ select,input[type=text],input[type=date],input[type=month],textarea{font:inherit
 <body>
 <div class="wrap">
   <header class="top">
-    <h1>순공 기록표<small>누르고, 확인하고, 저장</small></h1>
+    <h1>적자생존<small>적는 자가 살아남는다</small></h1>
     <span class="status" id="status">불러오는 중…</span>
   </header>
   <nav class="tabs">
@@ -160,14 +172,10 @@ select,input[type=text],input[type=date],input[type=month],textarea{font:inherit
       <button class="btn sm" data-a="dtoday">오늘</button>
     </div>
 
+    <div class="card goals" id="goals"></div>
+
     <div class="card">
-      <div class="inbox">
-        <input id="cmd" type="text" autocomplete="off" placeholder="예: 1시 10분부터 독서 시작" enterkeyhint="done">
-      </div>
-      <div class="hint" id="hint">
-        입력하면 아래에 <b>저장될 내용</b>이 먼저 보여요. 확인 후 저장(Enter).<br>
-        예시: <code>토익 시작</code> <code>공부 끝</code> <code>휴식 시작</code> <code>1시 10분부터 독서 시작</code> <code>아까 1시 20분에 끝났어</code> <code>2시부터 3시 반까지 인강</code> <code>토익 끝내고 휴식 시작</code>
-      </div>
+      <input id="cmd" type="hidden">
       <div id="preview"></div>
       <div class="chips" id="chips"></div>
       <div class="fix" id="fix"></div>
@@ -193,7 +201,7 @@ select,input[type=text],input[type=date],input[type=month],textarea{font:inherit
   <section id="v-set" hidden></section>
 </div>
 <div id="login"><form class="box" id="loginForm" autocomplete="on">
-  <h2>순공 기록표</h2>
+  <h2>적자생존</h2>
   <p class="note" id="loginSub">폰·아이패드·맥에서 같은 기록을 보려면 로그인하세요.</p>
   <input type="email" id="lgEmail" placeholder="이메일" autocomplete="username" required>
   <input type="password" id="lgPw" placeholder="비밀번호 (6자 이상)" autocomplete="current-password" required>
@@ -226,12 +234,12 @@ const DEF_CATS=[
 const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3);
 function defaultState(){
   return {cats:DEF_CATS.map((c,i)=>({id:uid(),name:c[0],study:c[1],color:PALETTE[i%PALETTE.length],alias:c[2]})),
-          routines:[],settings:{round10:false,mig1:true},days:{}};
+          routines:[],settings:{round10:false,mig1:true},days:{},goals:{}};
 }
 let state;
 try{ state=JSON.parse(localStorage.getItem(LS)||'null'); }catch(e){ state=null; }
 if(!state||!Array.isArray(state.cats)) state=defaultState();
-state.days=state.days||{}; state.routines=state.routines||[]; state.settings=state.settings||{round10:false};
+state.days=state.days||{}; state.goals=state.goals||{}; state.routines=state.routines||[]; state.settings=state.settings||{round10:false};
 
 
 /* 순공 = 토익만, '공부' 활동 제거 (1회 적용) */
@@ -288,6 +296,7 @@ function dayStats(list){
 }
 
 /* ---------- 저장 (이 기기 + 계정 DB) ---------- */
+const hasGoal=g=>Array.isArray(g)&&g.some(x=>x&&(x.t||x.d));
 function saveLocal(){ try{localStorage.setItem(LS,JSON.stringify(state));}catch(e){} }
 let col=null, remoteReady=false, dbTimer=null;
 const W={};
@@ -302,7 +311,7 @@ function queueWrite(key){
 }
 function bodyOf(key){
   if(key==='meta') return {cats:state.cats,routines:state.routines,settings:state.settings,v:1};
-  return {items:state.days[key.slice(2)]||[]};
+  const dk=key.slice(2); return {items:state.days[dk]||[],goals:state.goals[dk]||[]};
 }
 async function flush(key){
   const w=W[key]; w.t=null; if(w.busy){w.again=true;return;}
@@ -317,8 +326,8 @@ async function flush(key){
   if(w.again){w.again=false;flush(key);} else if(!w.t) w.pending=false;
 }
 const isPending=key=>!!(W[key]&&(W[key].pending||W[key].busy));
-function hasLocalData(){ return Object.values(state.days).some(a=>a&&a.length)||state.routines.length; }
-function pushAll(){ queueWrite('meta'); Object.keys(state.days).forEach(k=>{ if(state.days[k].length) queueWrite(dayDoc(k)); }); }
+function hasLocalData(){ return Object.values(state.days).some(a=>a&&a.length)||Object.values(state.goals).some(hasGoal)||state.routines.length; }
+function pushAll(){ queueWrite('meta'); new Set([...Object.keys(state.days),...Object.keys(state.goals)]).forEach(k=>{ if((state.days[k]&&state.days[k].length)||hasGoal(state.goals[k])) queueWrite(dayDoc(k)); }); }
 function applySnap(snap){
   const real=!snap.metadata.fromCache;
   if(real){ clearTimeout(dbTimer); }
@@ -327,7 +336,7 @@ function applySnap(snap){
     const ids=new Set(snap.docs.map(d=>d.id));
     if(snap.empty){ if(hasLocalData()) pushAll(); else queueWrite('meta'); setStatus('cloud','☁ 계정에 저장됨'); return; }
     if(!ids.has('meta')) queueWrite('meta');
-    Object.keys(state.days).forEach(k=>{ if(state.days[k].length&&!ids.has(dayDoc(k))) queueWrite(dayDoc(k)); });
+    new Set([...Object.keys(state.days),...Object.keys(state.goals)]).forEach(k=>{ if(((state.days[k]&&state.days[k].length)||hasGoal(state.goals[k]))&&!ids.has(dayDoc(k))) queueWrite(dayDoc(k)); });
     setStatus('cloud','☁ 계정에 저장됨');
   }
   let changed=false;
@@ -342,6 +351,8 @@ function applySnap(snap){
     } else if(id.startsWith('d-')){
       const k=id.slice(2), its=Array.isArray(d.items)?d.items:[];
       if(JSON.stringify(its)!==JSON.stringify(state.days[k]||[])){ state.days[k]=JSON.parse(JSON.stringify(its)); changed=true; }
+      const gl=Array.isArray(d.goals)?d.goals:[];
+      if(JSON.stringify(gl)!==JSON.stringify(state.goals[k]||[])){ if(gl.length) state.goals[k]=JSON.parse(JSON.stringify(gl)); else delete state.goals[k]; changed=true; }
     }
   });
   if(migrate()){ changed=true; queueWrite('meta'); }
@@ -587,6 +598,41 @@ function renderChips(){
   $('#chips').innerHTML=h;
   $('#fix').innerHTML='<button class="btn sm" data-a="undo"'+(undos.length?'':' disabled')+'>↶ 되돌리기</button><button class="btn sm danger" data-a="dellast"'+(items().length?'':' disabled')+'>✕ 마지막 기록 삭제</button>';
 }
+/* ---------- 오늘의 목표 3가지 ---------- */
+function getGoals(k){
+  const g=state.goals[k]||[]; const out=[];
+  for(let i=0;i<3;i++){ const x=g[i]||{}; out.push({t:String(x.t||''),d:!!x.d}); }
+  return out;
+}
+function setGoal(k,i,patch){
+  const g=getGoals(k); Object.assign(g[i],patch); if(!g[i].t) g[i].d=false;
+  if(g.some(x=>x.t||x.d)) state.goals[k]=g; else delete state.goals[k];
+  commit([dayDoc(k)]);
+}
+function goalHead(k){
+  const n=getGoals(k).filter(x=>x.t&&x.d).length; const c=$('#gcount');
+  if(c){ c.textContent=n===3?'🎉 모두 달성!':n+' / 3 완료'; c.classList.toggle('all',n===3); }
+  return n;
+}
+function renderGoals(){
+  const box=$('#goals'); if(!box) return;
+  const ae=document.activeElement;
+  if(ae&&ae.dataset&&ae.dataset.a==='gtext'&&ae.dataset.k===cur&&box.contains(ae)) return;
+  const g=getGoals(cur);
+  box.innerHTML='<div class="sec-t"><span>🎯 '+(cur===todayKey()?'오늘의':'그날의')+' 목표 3가지</span><span class="gcount" id="gcount"></span></div>'+
+    g.map((x,i)=>'<div class="g'+(x.d?' done':'')+'"><input type="checkbox" class="gchk" data-a="gdone" data-v="'+i+'" data-k="'+cur+'"'+(x.d?' checked':'')+' aria-label="목표 '+(i+1)+' 완료">'+
+      '<input type="text" class="gt" data-a="gtext" data-v="'+i+'" data-k="'+cur+'" value="'+esc(x.t)+'" placeholder="'+(i+1)+'. 목표를 적어 보세요" maxlength="80" autocomplete="off" enterkeyhint="'+(i<2?'next':'done')+'"></div>').join('');
+  goalHead(cur);
+}
+let gt=null;
+function saveGoalText(el){
+  const k=el.dataset.k, i=+el.dataset.v, t=el.value.trim();
+  setGoal(k,i,{t});
+  if(!t){ const row=el.closest('.g'); if(row){ row.classList.remove('done'); const cb=row.querySelector('.gchk'); if(cb) cb.checked=false; } }
+  goalHead(k);
+}
+function flushGoal(){ const ae=document.activeElement; if(ae&&ae.dataset&&ae.dataset.a==='gtext'){ clearTimeout(gt); saveGoalText(ae); } }
+
 function renderSummary(){
   const its=items(), st=dayStats(its); const now=rawNow(); const isToday=cur===todayKey();
   const studyCats=Object.keys(st.catMin).filter(isStudy).sort((a,b)=>st.catMin[b]-st.catMin[a]);
@@ -607,7 +653,7 @@ function renderSummary(){
 }
 function renderList(){
   const its=sortItems(), st=dayStats(its);
-  if(!its.length){ $('#list').innerHTML='<li class="empty">아직 기록이 없어요. 위 버튼을 누르거나 "토익 시작"처럼 입력해 보세요.</li>'; return; }
+  if(!its.length){ $('#list').innerHTML='<li class="empty">아직 기록이 없어요. 위 활동 버튼을 눌러 시작해 보세요.</li>'; return; }
   $('#list').innerHTML=its.map(i=>{
     const c=catById(i.cat); const open=i.e==null;
     let h='<li><div class="rec" data-a="row" data-v="'+i.id+'"><span class="bar" style="background:'+catColor(i.cat)+'"></span>'+
@@ -628,13 +674,14 @@ function renderList(){
 }
 function renderDay(){
   $('#dlabel').textContent=dLabel(cur)+(cur===todayKey()?' · 오늘':'');
-  renderChips(); renderSummary(); renderList();
+  renderGoals(); renderChips(); renderSummary(); renderList();
 }
 
 /* ---------- 복사 텍스트 ---------- */
 function dayText(k){
   const its=items(k).slice().sort((a,b)=>a.s-b.s), st=dayStats(its);
   let out=[dLabel(k)+' 기록'];
+  const gl=getGoals(k); if(gl.some(x=>x.t)){ out.push('🎯 목표 '+gl.filter(x=>x.t&&x.d).length+'/'+gl.filter(x=>x.t).length+' 달성'); gl.forEach(x=>{ if(x.t) out.push((x.d?'✅ ':'⬜ ')+x.t); }); out.push(''); }
   its.forEach(i=>{ out.push(i.e==null? fmt(i.s)+'~ '+catName(i.cat)+' (종료 미입력)' : fmt(i.s)+'~'+fmt(i.e)+' '+catName(i.cat)+' '+dur(i.e-i.s)+(i.memo?' - '+i.memo:'')); });
   if(!its.length) out.push('(기록 없음)');
   out.push('');
@@ -816,12 +863,15 @@ document.addEventListener('click',e=>{
       let d; try{ d=JSON.parse(txt); }catch(err){ toast('백업 형식이 아니에요'); break; }
       if(!d||!Array.isArray(d.cats)||typeof d.days!=='object'){ toast('백업 형식이 아니에요'); break; }
       if(!confirmImport){ confirmImport=true; renderSet(); $('#bkin').value=txt; break; }
-      confirmImport=false; const old=Object.keys(state.days);
-      state={cats:d.cats,routines:d.routines||[],settings:d.settings||{round10:false},days:d.days};
-      commit(['meta',...new Set([...old,...Object.keys(state.days)])].map(k=>k==='meta'?k:dayDoc(k)));
+      confirmImport=false; const old=[...Object.keys(state.days),...Object.keys(state.goals)];
+      state={cats:d.cats,routines:d.routines||[],settings:d.settings||{round10:false},days:d.days,goals:d.goals||{}};
+      commit(['meta',...new Set([...old,...Object.keys(state.days),...Object.keys(state.goals)])].map(k=>k==='meta'?k:dayDoc(k)));
       renderSet(); toast('복원했어요'); break; }
   }
 });
+document.addEventListener('input',e=>{ const el=e.target; if(el.dataset&&el.dataset.a==='gtext'){ clearTimeout(gt); gt=setTimeout(()=>saveGoalText(el),600); } });
+document.addEventListener('keydown',e=>{ const el=e.target; if(el.dataset&&el.dataset.a==='gtext'&&e.key==='Enter'&&!e.isComposing){ e.preventDefault(); const nx=el.closest('.g').nextElementSibling; const nt=nx&&nx.querySelector('.gt'); if(nt) nt.focus(); else el.blur(); } });
+window.addEventListener('pagehide',flushGoal); document.addEventListener('visibilitychange',()=>{ if(document.hidden) flushGoal(); });
 document.addEventListener('change',e=>{
   const el=e.target;
   const tp=el.closest('.tp'); if(tp){ onPick(tp.dataset.tp,tpRead(tp)); return; }
@@ -832,6 +882,10 @@ document.addEventListener('change',e=>{
     case 'pnewstudy': if(P) P.newStudy=el.checked; break;
     case 'pclose': if(P&&P.close) P.close.on=el.checked; break;
     case 'rcat': { const r=items().find(i=>i.id===v); if(r&&el.value){ snapshotDay(); r.cat=el.value; commit([dayDoc(cur)]); renderDay(); } break; }
+    case 'gdone': { const k=el.dataset.k,i=+v; const ti=el.closest('.g').querySelector('.gt'); clearTimeout(gt); saveGoalText(ti);
+      if(!ti.value.trim()){ el.checked=false; toast('목표를 먼저 적어 주세요'); break; }
+      setGoal(k,i,{d:el.checked}); el.closest('.g').classList.toggle('done',el.checked); if(goalHead(k)===3) toast('🎉 오늘 목표 3개 모두 달성!'); break; }
+    case 'gtext': clearTimeout(gt); saveGoalText(el); break;
     case 'rmemo': { const r=items().find(i=>i.id===v); if(r){ r.memo=el.value.trim(); commit([dayDoc(cur)]); renderList(); } break; }
     case 'ccolor': if(c){ c.color=el.value; commit(['meta']); } break;
     case 'cname': if(c&&el.value.trim()){ c.name=el.value.trim(); commit(['meta']); } break;
