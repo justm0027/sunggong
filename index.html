@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>적자생존</title>
-<meta name="theme-color" content="#f7f4ec">
+<meta name="theme-color" content="#fff5f1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="적자생존">
@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
 :root{
   --paper:#f7f4ec; --card:#fffdf8; --ink:#1f2420; --sub:#6b6f68; --line:#e4dfd2;
@@ -150,6 +150,32 @@ select,input[type=text],input[type=date],input[type=month],textarea{font:inherit
   .rec .tm{width:96px;font-size:13px}
   .mstat{grid-template-columns:repeat(2,1fr)}
 }
+
+/* ===== 파스텔 다이어리 테마 (색감만 변경) ===== */
+:root{--paper:#fff5f1;--card:#ffffff;--ink:#3b2a2f;--sub:#8a6c74;--line:#efdde2;--acc:#b04a6e;--acc2:#ffd3e0;--warn:#a35a1c;--warnbg:#fdebd8}
+html,body{font-family:'Gowun Dodum','Noto Sans KR',system-ui,sans-serif}
+body{background-image:radial-gradient(#f1d9d0 1.2px,transparent 1.2px);background-size:18px 18px}
+h1,.big b,.sec-t,.datebar .d,.mstat b,.tabs button,.btn,.chip,.gcount{font-family:'Noto Sans KR',sans-serif}
+.card{border-radius:22px;box-shadow:0 2px 0 #f1d9d0}
+.tabs{border-radius:18px}.tabs button{border-radius:14px}
+.tabs button.on{background:var(--acc2);color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.chip{border:2px dashed #d9bfc6;color:var(--ink)}
+.chip.end{background:var(--acc2);color:var(--ink);border:2px solid var(--ink)}
+.chip .st{color:var(--acc)}
+.running{background:#dff1e8;color:#2f5d4b;border-radius:18px}
+.running.none{background:#fbf1ee;color:var(--sub)}
+.big b{width:fit-content;color:var(--ink);background:var(--acc2);padding:2px 10px;border-radius:10px;margin:4px 0 6px}
+.pill,.mstat div,.hint code{background:#fbf1ee}
+.tag.s{color:#7d2f4d}
+.pv{background:#fff0f4}
+.edit{background:#fff8f5}
+.inbox input,.goals .gt{border-radius:16px}
+.goals .g.done .gt{background:#fbf1ee}
+.gchk:checked{background:var(--acc2);border-color:var(--ink)}
+.gchk:checked::after{color:var(--ink)}
+.gcount.all{color:var(--acc)}
+.status.cloud{border-color:#efc6d3}
+.share{background:#f6e6ea}
 </style>
 </head>
 <body>
