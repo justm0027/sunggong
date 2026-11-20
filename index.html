@@ -663,20 +663,28 @@ function flushGoal(){ const ae=document.activeElement; if(ae&&ae.dataset&&ae.dat
 
 function renderSummary(){
   const its=items(), st=dayStats(its); const now=rawNow(); const isToday=cur===todayKey();
-  const studyCats=Object.keys(st.catMin).filter(isStudy).sort((a,b)=>st.catMin[b]-st.catMin[a]);
-  const otherCats=Object.keys(st.catMin).filter(k=>!isStudy(k)).sort((a,b)=>st.catMin[b]-st.catMin[a]);
+  // 진행 중인 활동도 지금 시각까지 합계에 실시간 반영 (오늘만)
+  const live=isToday? st.open.filter(r=>now>r.s).map(r=>({cat:r.cat,iv:[r.s,now]})) : [];
+  const closed=its.filter(i=>i.e!=null&&i.e>i.s);
+  const studyLive=unionLen(closed.filter(i=>isStudy(i.cat)).map(i=>[i.s,i.e]).concat(live.filter(x=>isStudy(x.cat)).map(x=>x.iv)));
+  const allLive=unionLen(closed.map(i=>[i.s,i.e]).concat(live.map(x=>x.iv)));
+  const catMin=Object.assign({},st.catMin);
+  live.forEach(x=>{ catMin[x.cat]=unionLen(closed.filter(i=>i.cat===x.cat).map(i=>[i.s,i.e]).concat(live.filter(y=>y.cat===x.cat).map(y=>y.iv))); });
+  const liveStudy=studyLive>st.study;
+  const studyCats=Object.keys(catMin).filter(isStudy).sort((a,b)=>catMin[b]-catMin[a]);
+  const otherCats=Object.keys(catMin).filter(k=>!isStudy(k)).sort((a,b)=>catMin[b]-catMin[a]);
   let run='';
   if(st.open.length){
     run=st.open.map(r=>{
       const el=isToday?Math.max(0,now-r.s):null;
       return '<div><b>'+esc(catName(r.cat))+'</b> '+fmt(r.s)+'~ '+(el!=null?'<span>('+dur(el)+'째)</span>':'')+' <button class="btn sm" data-a="qe" data-v="'+r.id+'">지금 종료</button></div>';
-    }).join('')+'<div class="note" style="margin-top:4px">진행 중 시간은 종료를 입력해야 합계에 들어가요.</div>';
+    }).join('')+'<div class="note" style="margin-top:4px">'+(isToday?'진행 중 시간도 지금까지 합계에 실시간으로 더해져요.':'종료 시각을 입력해야 합계에 들어가요.')+'</div>';
   }
-  $('#summary').innerHTML='<div class="sum"><div class="big">순공 합계<b>'+dur(st.study)+'</b>'+
-    '<span class="note">기록된 전체 '+dur(st.all)+'</span></div>'+
+  $('#summary').innerHTML='<div class="sum"><div class="big">순공 합계'+(liveStudy?' <span style="color:var(--acc);font-weight:700">● 실시간</span>':'')+'<b>'+dur(studyLive)+'</b>'+
+    '<span class="note">기록된 전체 '+dur(allLive)+(liveStudy?' · 확정 '+dur(st.study):'')+'</span></div>'+
     '<div class="running'+(st.open.length?'':' none')+'">'+(st.open.length?run:'진행 중인 활동 없음')+'</div></div>'+
-    '<div class="catsum">'+studyCats.map(k=>'<span class="pill" style="background:var(--acc2)"><span class="dot" style="background:'+catColor(k)+'"></span>'+esc(catName(k))+' '+dur(st.catMin[k])+'</span>').join('')+
-    otherCats.map(k=>'<span class="pill"><span class="dot" style="background:'+catColor(k)+'"></span>'+esc(catName(k))+' '+dur(st.catMin[k])+'</span>').join('')+'</div>'+
+    '<div class="catsum">'+studyCats.map(k=>'<span class="pill" style="background:var(--acc2)"><span class="dot" style="background:'+catColor(k)+'"></span>'+esc(catName(k))+' '+dur(catMin[k])+'</span>').join('')+
+    otherCats.map(k=>'<span class="pill"><span class="dot" style="background:'+catColor(k)+'"></span>'+esc(catName(k))+' '+dur(catMin[k])+'</span>').join('')+'</div>'+
     (st.overlap.size?'<div class="warn note" style="color:var(--warn);margin-top:8px">⚠ 시간이 겹친 기록이 있어요. 순공 합계는 겹친 시간을 한 번만 셉니다.</div>':'');
 }
 function renderList(){
@@ -937,7 +945,8 @@ function onPick(key,val){
 }
 
 /* ---------- 시작 ---------- */
-setInterval(()=>{ if(tab==='day'&&cur===todayKey()) renderSummary(); },30000);
+setInterval(()=>{ if(tab==='day'&&cur===todayKey()) renderSummary(); },20000);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&tab==='day') renderSummary(); });
 renderDay();
 window.SG={attachSync,detachSync,resetLocal,setStatus,setAccount:a=>{account=a; if(tab==='set') renderSet();}};
 window.__sg={parse,state:()=>state,dayText};
