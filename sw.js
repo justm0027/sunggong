@@ -1,5 +1,5 @@
 // 순공 기록표 — 오프라인에서도 열리게 해 주는 파일
-const CACHE = 'sunggong-v2';
+const CACHE = 'sunggong-v3';
 const CORE = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
