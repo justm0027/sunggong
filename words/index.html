@@ -65,6 +65,14 @@ h1{font-size:21px;font-weight:900;margin:0;letter-spacing:-.5px}
 .hr{width:60%;border-top:2px dashed var(--line)}
 .back{font-size:clamp(20px,5.5vw,26px);font-weight:700;font-family:'Noto Sans KR';white-space:pre-line;word-break:break-word}
 .extra{font-size:16px;color:var(--sub);white-space:pre-line;line-height:1.6;max-width:560px}
+.means{display:flex;flex-direction:column;gap:4px}
+.notes{font-size:15.5px;line-height:1.65;white-space:pre-line;max-width:600px;color:var(--ink)}
+.notes .nh{display:inline-block;font-size:12px;font-weight:700;color:var(--acc);background:#fff0f4;padding:1px 8px;border-radius:99px;margin-bottom:2px;font-family:'Noto Sans KR'}
+.exs{width:100%;max-width:600px;display:flex;flex-direction:column;gap:8px;text-align:left}
+.ex{background:#fbf1ee;border-radius:14px;padding:10px 12px}
+.ex .en{font-size:16px;line-height:1.5}
+.ex .ko{font-size:14px;color:var(--sub);margin-top:2px;line-height:1.5}
+.extag{font-size:12px;color:var(--sub)}
 .say{border:0;background:#fbf1ee;border-radius:99px;width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink)}
 .grade{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .grade button{border:0;border-radius:16px;padding:10px 4px;min-height:64px;font:inherit;font-weight:900;font-size:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
@@ -350,6 +358,32 @@ function barsHTML(){
   const mx=Math.max(10,...days.map(x=>x.a));
   return '<div class="bars">'+days.map(x=>'<div class="b'+(x.k===todayKey()?' t':'')+'"><span>'+(x.a||'')+'</span><i style="height:'+(x.a/mx*100)+'%"></i><span>'+x.w+'</span></div>').join('')+'</div>';
 }
+/* 뒷면 정리: 발음기호 빼고, 뜻(품사) → 설명 → 예문 순서 */
+const HANGUL=/[ㄱ-ㆎ가-힣]/;
+const POS=/^(?:\(?(?:n|v|vt|vi|a|adj|ad|adv|prep|conj|pron|phr|int)\.?\)?(?:\s|$)|(?:명|동|형|부|전|접)(?:사)?[\s.)]|[①-⑩])/i;
+function stripPron(t){ return String(t||'').split('\n').map(l=>l.replace(/\[\s*(?:미|영)?\s*[^\]ㄱ-ㆎ가-힣]*\]/g,'').replace(/[ \t]{2,}/g,' ').trim()).filter(Boolean).join('\n'); }
+function layout(text){
+  const lines=stripPron(text).split('\n').filter(Boolean);
+  const mean=[], note=[], ex=[]; let lastEx=null;
+  lines.forEach(l=>{
+    if(POS.test(l)){ mean.push(l); lastEx=null; return; }
+    const words=l.split(/\s+/).length;
+    if(!HANGUL.test(l)&&/[A-Za-z]/.test(l)&&words>=3&&!/^[\[→\-–•*]/.test(l)){ lastEx={en:l,ko:''}; ex.push(lastEx); return; }
+    if(lastEx&&!lastEx.ko&&HANGUL.test(l)&&!/^[\[→]/.test(l)){ lastEx.ko=l; lastEx=null; return; }
+    note.push(l); lastEx=null;
+  });
+  return {mean,note,ex};
+}
+const meanText=c=>{ const L=layout(c.b); return L.mean.length? L.mean.join('\n') : stripPron(c.b); };
+function backHTML(c){
+  const L=layout(c.b);
+  if(!L.mean.length&&!L.ex.length) return '<div class="back">'+esc(stripPron(c.b))+'</div>';
+  let h='';
+  if(L.mean.length) h+='<div class="back means">'+L.mean.map(m=>'<div>'+esc(m)+'</div>').join('')+'</div>';
+  if(L.note.length) h+='<div class="notes">'+L.note.map(n=>/이렇게 나온다/.test(n)?'<span class="nh">'+esc(n)+'</span>':esc(n)).join('\n')+'</div>';
+  if(L.ex.length) h+='<div class="exs">'+L.ex.map(e=>'<div class="ex"><div class="en">'+esc(e.en)+'</div>'+(e.ko?'<div class="ko">'+esc(e.ko)+'</div>':'')+'</div>').join('')+'</div>';
+  return h;
+}
 function studyHTML(){
   const c=session.cur, d=deckById(session.deck);
   const cnt=counts(session.deck);
@@ -361,13 +395,13 @@ function studyHTML(){
       (wait?'<button class="btn pink" data-a="refresh" style="margin-top:12px">다시 확인</button>':'')+'</div></div>';
     return h;
   }
-  const front=session.reverse?c.b:c.f, back=session.reverse?c.f:c.b;
+  const front=session.reverse?meanText(c):c.f;
   const tag=c.s==='n'?'<span class="tag t-n">새 카드</span>':(c.s==='r'?'<span class="tag t-r">복습</span>':'<span class="tag t-l">학습 중</span>');
   h+='<div class="flash" data-a="reveal"><div>'+tag+(d?'<span class="note" style="margin-left:6px">'+esc(d.name)+'</span>':'')+'</div>'+
-     '<div class="front'+(String(front).length>24?' small':'')+'">'+esc(front)+'</div>'+
+     '<div class="front'+(String(front).length>24?' small':'')+'">'+esc(stripPron(front))+'</div>'+
      (!session.reverse?'<button class="say" data-a="say" aria-label="발음 듣기">'+SVG_SPK+'</button>':'');
   if(revealed){
-    h+='<div class="hr"></div><div class="back">'+esc(back)+'</div>'+(session.reverse?'<button class="say" data-a="say" aria-label="발음 듣기">'+SVG_SPK+'</button>':'')+(c.x?'<div class="extra">'+esc(c.x)+'</div>':'');
+    h+='<div class="hr"></div>'+(session.reverse?'<div class="back">'+esc(c.f)+'</div><button class="say" data-a="say" aria-label="발음 듣기">'+SVG_SPK+'</button>':'')+backHTML(c)+(c.x?'<div class="extag">'+esc(stripPron(c.x))+'</div>':'');
   } else h+='<span class="note">카드를 누르거나 아래 버튼으로 정답 보기</span>';
   h+='</div>';
   if(!revealed) h+='<button class="show" data-a="reveal">정답 보기</button>';
@@ -390,7 +424,7 @@ function listHTML(){
   const total=cs.length; cs=cs.slice(0,300);
   let h='<div class="card"><div class="row" style="margin-bottom:10px"><input class="search" id="q" type="text" placeholder="단어·뜻 검색" value="'+esc(listQ)+'" style="flex:1;min-width:160px"><select id="ld"><option value="">모든 단어장</option>'+S.meta.decks.map(d=>'<option value="'+d.id+'"'+(d.id===listDeck?' selected':'')+'>'+esc(d.name)+'</option>').join('')+'</select></div>'+
     '<div class="between"><span class="note">'+total+'개'+(total>300?' (앞 300개만 표시 — 검색해 보세요)':'')+'</span><button class="btn sm pri" data-a="addcard">＋ 단어 추가</button></div><ul class="wl">';
-  cs.forEach(c=>{ h+='<li data-a="editcard" data-v="'+c.id+'"><div class="w">'+esc(c.f)+stateTag(c)+'</div><div class="m">'+esc(String(c.b).replace(/\n/g,' · '))+'</div></li>'; });
+  cs.forEach(c=>{ h+='<li data-a="editcard" data-v="'+c.id+'"><div class="w">'+esc(c.f)+stateTag(c)+'</div><div class="m">'+esc(meanText(c).replace(/\n/g,' · '))+'</div></li>'; });
   if(!total) h+='<li class="empty" style="cursor:default">단어가 없어요</li>';
   return h+'</ul></div>';
 }
@@ -576,7 +610,7 @@ document.addEventListener('keydown',e=>{
 
 render();
 window.SG={attachSync,detachSync,resetLocal,setStatus,setAccount:a=>{account=a; if(tab==='set') render();}};
-window.__v={parse:parseDelimited,schedule,S:()=>S,prepImport,doImport:()=>doImport()};
+window.__v={layout,parse:parseDelimited,schedule,S:()=>S,prepImport,doImport:()=>doImport()};
 })();
 </script>
 <script type="module">
