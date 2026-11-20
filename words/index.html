@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>단어장</title>
+<meta name="theme-color" content="#fff5f1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="단어장">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fff5f1; --card:#ffffff; --ink:#3b2a2f; --sub:#8a6c74; --line:#efdde2;
+  --acc:#b04a6e; --acc2:#ffd3e0; --mint:#dff1e8; --mintink:#2f5d4b; --bad:#a33b3b;
+  --new:#3d6fd1; --learn:#c0392b; --rev:#2f7d55;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:'Gowun Dodum','Noto Sans KR',system-ui,sans-serif;font-size:15px;-webkit-text-size-adjust:100%}
+body{background-image:radial-gradient(#f1d9d0 1.2px,transparent 1.2px);background-size:18px 18px;background-attachment:fixed}
+h1,h2,.btn,.tabs button,.num,.sec-t,.grade button{font-family:'Noto Sans KR',sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:16px 14px calc(90px + env(safe-area-inset-bottom))}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+h1{font-size:21px;font-weight:900;margin:0;letter-spacing:-.5px}
+.status{font-size:11px;color:var(--sub);background:var(--card);border:1px solid var(--line);padding:3px 8px;border-radius:99px;white-space:nowrap}
+.tabs{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:4px;margin-bottom:14px}
+.tabs button{flex:1;border:0;background:none;padding:10px 4px;border-radius:14px;font:inherit;font-weight:700;color:var(--sub);cursor:pointer;font-size:14px}
+.tabs button.on{background:var(--acc2);color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;margin-bottom:12px;box-shadow:0 2px 0 #f1d9d0}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:700;padding:10px 14px;border-radius:14px;cursor:pointer;line-height:1.2;min-height:44px}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.pink{background:var(--acc2);border:2px solid var(--ink)}
+.btn.sm{padding:6px 10px;font-size:13px;min-height:34px;border-radius:10px}
+.btn.ghost{background:none;border-color:transparent;color:var(--sub)}
+.btn.danger{color:var(--bad)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.between{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.note{font-size:12.5px;color:var(--sub);line-height:1.6}
+.sec-t{font-weight:900;font-size:16px;margin:0 0 10px}
+.today{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.today div{background:#fbf1ee;border-radius:14px;padding:10px 6px;text-align:center;font-size:12px;color:var(--sub)}
+.today b{display:block;font-size:22px;color:var(--ink);font-family:'Noto Sans KR';font-weight:900}
+.deck{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px dashed var(--line)}
+.deck:first-of-type{border-top:0}
+.deck .nm{flex:1;min-width:0;font-weight:700;font-size:16px;font-family:'Noto Sans KR'}
+.deck .nm small{display:block;font-weight:400;font-size:12px;color:var(--sub);font-family:'Gowun Dodum'}
+.cnt{display:flex;gap:10px;font-family:'Noto Sans KR';font-weight:700;font-size:15px}
+.c-new{color:var(--new)}.c-learn{color:var(--learn)}.c-rev{color:var(--rev)}
+.bars{display:flex;align-items:flex-end;gap:6px;height:80px;margin-top:8px}
+.bars .b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px;font-size:10px;color:var(--sub)}
+.bars i{display:block;width:100%;background:var(--acc2);border-radius:6px 6px 0 0;min-height:2px}
+.bars .b.t i{background:var(--acc)}
+/* study */
+.study{display:flex;flex-direction:column;gap:12px}
+.sbar{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.flash{background:var(--card);border:1px solid var(--line);border-radius:26px;box-shadow:0 3px 0 #f1d9d0;min-height:46vh;padding:26px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.front{font-size:clamp(30px,8vw,46px);font-weight:900;font-family:'Noto Sans KR';letter-spacing:-.5px;word-break:break-word;white-space:pre-line}
+.front.small{font-size:clamp(20px,5.5vw,28px)}
+.hr{width:60%;border-top:2px dashed var(--line)}
+.back{font-size:clamp(20px,5.5vw,26px);font-weight:700;font-family:'Noto Sans KR';white-space:pre-line;word-break:break-word}
+.extra{font-size:16px;color:var(--sub);white-space:pre-line;line-height:1.6;max-width:560px}
+.say{border:0;background:#fbf1ee;border-radius:99px;width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink)}
+.grade{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.grade button{border:0;border-radius:16px;padding:10px 4px;min-height:64px;font:inherit;font-weight:900;font-size:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.grade button small{font-weight:500;font-size:12px;opacity:.85}
+.g1{background:#f9d6d6;color:#7a1f1f}.g2{background:#fde7c8;color:#6b4210}.g3{background:var(--mint);color:var(--mintink)}.g4{background:#d9e4ff;color:#23407a}
+.show{width:100%;min-height:64px;border-radius:18px;border:2px solid var(--ink);background:var(--acc2);font:inherit;font-weight:900;font-size:18px;cursor:pointer;font-family:'Noto Sans KR'}
+.done{text-align:center;padding:40px 10px}
+.done b{font-size:24px;display:block;margin-bottom:8px;font-family:'Noto Sans KR'}
+/* list */
+.search{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:2px solid var(--ink);border-radius:16px;background:#fff;outline:none}
+.wl{list-style:none;margin:0;padding:0}
+.wl li{padding:10px 2px;border-bottom:1px dashed var(--line);cursor:pointer}
+.wl .w{font-weight:700;font-family:'Noto Sans KR'}
+.wl .m{color:var(--sub);font-size:13.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:5px;margin-left:6px;white-space:nowrap;font-family:'Noto Sans KR'}
+.t-n{background:#e2eafb;color:var(--new)}.t-l{background:#fbe1de;color:var(--learn)}.t-r{background:#dff1e8;color:var(--rev)}
+select,input[type=text],input[type=number],textarea{font:inherit;border:1px solid #d9bfc6;border-radius:10px;padding:8px 10px;background:#fff;color:var(--ink);font-size:16px}
+textarea{width:100%;min-height:90px}
+label.f{display:block;font-size:12px;color:var(--sub);font-weight:700;margin:10px 0 4px}
+.sw{display:inline-flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;user-select:none}
+.sw input{width:18px;height:18px;accent-color:var(--acc)}
+table.map{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;display:block;overflow-x:auto}
+table.map td,table.map th{border:1px solid var(--line);padding:5px 6px;vertical-align:top;max-width:180px;white-space:pre-line}
+table.map th{background:#fbf1ee}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 14px;border-radius:12px;font-size:14px;display:none;align-items:center;gap:12px;z-index:50;max-width:92vw}
+#toast button{white-space:nowrap;background:none;border:1px solid #fff6;color:#fff;border-radius:8px;padding:4px 9px;font:inherit;font-size:13px;cursor:pointer}
+#modal{position:fixed;inset:0;background:rgba(40,25,30,.45);display:none;align-items:flex-start;justify-content:center;z-index:40;overflow:auto;padding:30px 12px}
+#modal .box{background:var(--card);border-radius:20px;padding:16px;width:100%;max-width:520px}
+#login{position:fixed;inset:0;background:var(--paper);z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
+#login .box{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;width:100%;max-width:360px}
+#login h2{margin:0 0 4px;font-size:22px;font-weight:900}
+#login input{width:100%;font-size:16px;padding:11px 12px;margin-top:8px;border:1px solid #d9bfc6;border-radius:12px}
+#login .btn{width:100%;margin-top:10px}
+#login .msg{font-size:13px;color:var(--bad);min-height:18px;margin-top:8px}
+#login .msg.ok{color:var(--rev)}
+.linkbtn{background:none;border:0;color:var(--sub);font:inherit;font-size:13px;text-decoration:underline;cursor:pointer;padding:6px 0}
+.empty{color:var(--sub);text-align:center;padding:20px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>단어장</h1>
+    <span class="status" id="status">불러오는 중…</span>
+  </header>
+  <nav class="tabs" id="tabs">
+    <button data-a="tab" data-v="home" class="on">공부</button>
+    <button data-a="tab" data-v="list">단어 목록</button>
+    <button data-a="tab" data-v="import">가져오기</button>
+    <button data-a="tab" data-v="set">설정</button>
+  </nav>
+  <main id="view"></main>
+</div>
+<div id="login"><form class="box" id="loginForm" autocomplete="on">
+  <h2>단어장</h2>
+  <p class="note">순공 기록표와 같은 계정으로 로그인하세요. 폰·아이패드·맥에서 같은 단어와 복습 기록이 보여요.</p>
+  <input type="email" id="lgEmail" placeholder="이메일" autocomplete="username" required>
+  <input type="password" id="lgPw" placeholder="비밀번호" autocomplete="current-password" required>
+  <button class="btn pri" type="submit" id="lgGo">로그인</button>
+  <div class="msg" id="lgMsg"></div>
+  <div class="between"><button type="button" class="linkbtn" id="lgMode">처음이에요 (가입하기)</button><button type="button" class="linkbtn" id="lgReset">비밀번호 잊음</button></div>
+</form></div>
+<div id="toast"></div>
+<div id="modal"><div class="box" id="mbox"></div></div>
+
+<script>
+(function(){
+'use strict';
+/* ================= 기본 ================= */
+const LS='danbo-v1', DAY=86400000, CHUNK=250;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const uid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);
+const keyOf=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const dayStart=t=>{const d=new Date(t);d.setHours(0,0,0,0);return d.getTime();};
+const todayKey=()=>keyOf(new Date());
+const SVG_SPK='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+
+function defaultState(){
+  return {meta:{decks:[],settings:{newPerDay:20,autoSay:true,rate:0.9,steps:[1,10],rsteps:[10],grad:1,easy:4},stats:{}},chunks:{}};
+}
+let S;
+try{ S=JSON.parse(localStorage.getItem(LS)||'null'); }catch(e){ S=null; }
+if(!S||!S.meta) S=defaultState();
+S.meta.settings=Object.assign(defaultState().meta.settings,S.meta.settings||{});
+S.meta.stats=S.meta.stats||{}; S.meta.decks=S.meta.decks||[]; S.chunks=S.chunks||{};
+
+/* 카드 색인 */
+let IDX=new Map(); // id -> {card, key}
+function reindex(){ IDX=new Map(); for(const k in S.chunks){ (S.chunks[k]||[]).forEach(c=>IDX.set(c.id,{c,k})); } }
+reindex();
+const allCards=()=>{ const a=[]; IDX.forEach(v=>{ if(!v.c.del) a.push(v.c); }); return a; };
+const deckCards=id=>allCards().filter(c=>c.d===id);
+const deckById=id=>S.meta.decks.find(d=>d.id===id);
+
+/* ================= 저장·동기화 ================= */
+let saveT=null;
+function saveLocal(){ clearTimeout(saveT); saveT=setTimeout(()=>{ try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){} },300); }
+let col=null, remoteReady=false, unsub=null, dbTimer=null, account=null;
+const W={};
+function setStatus(m){ $('#status').textContent=m; }
+function commit(keys){ saveLocal(); (keys||[]).forEach(queueWrite); }
+function queueWrite(key){ if(!col) return; const w=W[key]||(W[key]={}); w.pending=true; clearTimeout(w.t); w.t=setTimeout(()=>flush(key),1200); }
+function bodyOf(key){ return key==='meta'? {decks:S.meta.decks,settings:S.meta.settings,stats:trimStats(S.meta.stats),v:1} : {cards:S.chunks[key]||[]}; }
+function trimStats(st){ const ks=Object.keys(st).sort().slice(-400); const o={}; ks.forEach(k=>o[k]=st[k]); return o; }
+async function flush(key){
+  const w=W[key]; w.t=null; if(w.busy){ w.again=true; return; }
+  w.busy=true;
+  try{ await col.doc(key).set(JSON.parse(JSON.stringify(bodyOf(key)))); setStatus('☁ 동기화됨'); }
+  catch(e){ if(e&&e.code==='unavailable') setTimeout(()=>queueWrite(key),2000); else setStatus('이 기기에만 저장 중'); }
+  w.busy=false; if(w.again){ w.again=false; flush(key); } else if(!w.t) w.pending=false;
+}
+function flushAll(){ for(const k in W){ if(W[k].t){ clearTimeout(W[k].t); flush(k); } } }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') flushAll(); });
+const isPending=k=>!!(W[k]&&(W[k].pending||W[k].busy));
+function mergeCards(local,remote){
+  const m=new Map(); (local||[]).forEach(c=>m.set(c.id,c));
+  (remote||[]).forEach(r=>{ const l=m.get(r.id); if(!l||(r.mod||0)>=(l.mod||0)) m.set(r.id,r); });
+  return [...m.values()].sort((a,b)=>(a.o||0)-(b.o||0));
+}
+function applySnap(snap){
+  const real=!snap.metadata.fromCache;
+  if(real) clearTimeout(dbTimer);
+  if(real&&!remoteReady){
+    remoteReady=true; const ids=new Set(snap.docs.map(d=>d.id));
+    if(!ids.has('meta')) queueWrite('meta');
+    Object.keys(S.chunks).forEach(k=>{ if(!ids.has(k)) queueWrite(k); });
+    setStatus('☁ 동기화됨');
+  }
+  let changed=false;
+  snap.docs.forEach(doc=>{
+    const id=doc.id, d=doc.data()||{};
+    if(isPending(id)) return;
+    if(id==='meta'){
+      if(Array.isArray(d.decks)){
+        const before=JSON.stringify([S.meta.decks,S.meta.settings,S.meta.stats]);
+        S.meta.decks=d.decks; S.meta.settings=Object.assign(defaultState().meta.settings,d.settings||{});
+        const st=Object.assign({},d.stats||{}); for(const k in S.meta.stats){ if(!st[k]||(S.meta.stats[k].t||0)>(st[k].t||0)) st[k]=S.meta.stats[k]; } S.meta.stats=st;
+        if(JSON.stringify([S.meta.decks,S.meta.settings,S.meta.stats])!==before) changed=true;
+      }
+    } else if(id.startsWith('c-')){
+      const merged=mergeCards(S.chunks[id],d.cards||[]);
+      if(JSON.stringify(merged)!==JSON.stringify(S.chunks[id]||[])){ S.chunks[id]=merged; changed=true; }
+    }
+  });
+  if(changed){ reindex(); saveLocal(); if(!session) render(); }
+}
+function attachSync(adapter){
+  detachSync(); col=adapter; remoteReady=false; setStatus('연결 중…');
+  dbTimer=setTimeout(()=>setStatus('오프라인 — 연결되면 동기화'),10000);
+  unsub=adapter.onSnapshot(applySnap,()=>{ clearTimeout(dbTimer); setStatus('동기화 오류 — 이 기기에 저장 중'); });
+}
+function detachSync(){ if(unsub){ try{unsub();}catch(e){} unsub=null; } col=null; remoteReady=false; clearTimeout(dbTimer); }
+function resetLocal(){ S=defaultState(); reindex(); saveLocal(); session=null; render(); }
+
+/* ================= 복습 일정 (Anki 방식) ================= */
+function schedule(c0,g,now){
+  const c=Object.assign({},c0), st=S.meta.settings;
+  if(c.s==='n'){ c.s='l'; c.step=0; c.ease=2.5; c.ivl=0; }
+  const grad=ivl=>{ c.s='r'; c.ivl=Math.max(1,Math.round(ivl)); c.step=0; c.due=dayStart(now)+c.ivl*DAY; };
+  if(c.s==='l'||c.s==='rl'){
+    const steps=(c.s==='l'?st.steps:st.rsteps);
+    if(g===1){ c.step=0; c.due=now+steps[0]*60000; }
+    else if(g===2){ const m=(c.step===0&&steps.length>1)?(steps[0]+steps[1])/2:steps[Math.min(c.step,steps.length-1)]*1.5; c.due=now+m*60000; }
+    else if(g===3){ c.step=(c.step||0)+1; if(c.step>=steps.length) grad(c.s==='l'?st.grad:Math.max(1,c.ivl||1)); else c.due=now+steps[c.step]*60000; }
+    else grad(c.s==='l'?st.easy:Math.max(1,c.ivl||1)+1);
+  } else {
+    const late=Math.max(0,Math.floor((dayStart(now)-c.due)/DAY)); const ivl=c.ivl||1;
+    if(g===1){ c.lapses=(c.lapses||0)+1; c.ease=Math.max(1.3,(c.ease||2.5)-0.2); c.ivl=Math.max(1,Math.round(ivl*0.5)); c.s='rl'; c.step=0; c.due=now+st.rsteps[0]*60000; }
+    else{
+      let ni;
+      if(g===2){ ni=Math.max(ivl+1,ivl*1.2); c.ease=Math.max(1.3,(c.ease||2.5)-0.15); }
+      else if(g===3){ ni=Math.max(ivl+1,(ivl+late/2)*(c.ease||2.5)); }
+      else { ni=Math.max(ivl+2,(ivl+late)*(c.ease||2.5)*1.3); c.ease=(c.ease||2.5)+0.15; }
+      c.ivl=Math.min(36500,Math.round(ni)); c.due=dayStart(now)+c.ivl*DAY;
+    }
+  }
+  return c;
+}
+function fmtNext(c,now){
+  if(c.s==='r'){ const d=c.ivl; if(d<30) return d+'일'; if(d<365) return (d/30).toFixed(1).replace('.0','')+'개월'; return (d/365).toFixed(1).replace('.0','')+'년'; }
+  const m=Math.max(1,Math.round((c.due-now)/60000)); return m<60? m+'분' : Math.round(m/60)+'시간';
+}
+const tomorrow=()=>dayStart(Date.now())+DAY;
+function todayStat(){ const k=todayKey(); return S.meta.stats[k]||(S.meta.stats[k]={n:0,r:0,a:0,nb:{},t:0}); }
+function counts(deckId){
+  const now=Date.now(), tm=tomorrow(), cs=deckId?deckCards(deckId):allCards();
+  let n=0,l=0,r=0;
+  cs.forEach(c=>{ if(c.s==='n') n++; else if(c.s==='r'){ if(c.due<tm) r++; } else if(c.due<tm) l++; });
+  const ts=todayStat(); const lim=S.meta.settings.newPerDay;
+  if(deckId) n=Math.min(n,Math.max(0,lim-((ts.nb||{})[deckId]||0)));
+  else { n=S.meta.decks.reduce((s,d)=>s+counts(d.id).n,0); }
+  return {n,l,r};
+}
+
+/* ================= 공부 세션 ================= */
+let session=null, revealed=false, undoStack=[];
+function startSession(deckId,reverse){
+  session={deck:deckId,reverse:!!reverse,cur:null,turn:0,doneCount:0};
+  revealed=false; undoStack=[]; nextCard(); render();
+}
+function pickNext(){
+  const now=Date.now(), tm=tomorrow(), id=session.deck;
+  const cs=id?deckCards(id):allCards();
+  const learnDue=cs.filter(c=>(c.s==='l'||c.s==='rl')&&c.due<=now).sort((a,b)=>a.due-b.due);
+  if(learnDue.length) return learnDue[0];
+  const rev=cs.filter(c=>c.s==='r'&&c.due<tm).sort((a,b)=>a.due-b.due);
+  const ts=todayStat(); const lim=S.meta.settings.newPerDay;
+  const decksIds=id?[id]:S.meta.decks.map(d=>d.id);
+  let news=[];
+  for(const d of decksIds){ const left=Math.max(0,lim-((ts.nb||{})[d]||0)); if(left>0) news=news.concat(cs.filter(c=>c.d===d&&c.s==='n').sort((a,b)=>(a.o||0)-(b.o||0)).slice(0,left)); }
+  const wantNew=news.length&&(!rev.length||session.turn%4===3);
+  if(wantNew) return news[0];
+  if(rev.length) return rev[0];
+  const ahead=cs.filter(c=>(c.s==='l'||c.s==='rl')&&c.due<=now+20*60000).sort((a,b)=>a.due-b.due);
+  if(ahead.length) return ahead[0];
+  return null;
+}
+function nextCard(){
+  session.cur=pickNext(); revealed=false;
+  if(session.cur&&S.meta.settings.autoSay&&!session.reverse) setTimeout(()=>say(session.cur.f),150);
+}
+function answer(g){
+  const c=session.cur; if(!c||!revealed) return;
+  const now=Date.now(), ent=IDX.get(c.id); if(!ent) return;
+  const ts=todayStat();
+  undoStack.push({card:JSON.parse(JSON.stringify(c)),key:ent.k,stat:JSON.parse(JSON.stringify(ts)),turn:session.turn});
+  if(undoStack.length>30) undoStack.shift();
+  const wasNew=c.s==='n';
+  const nc=schedule(c,g,now); nc.mod=now; nc.reps=(c.reps||0)+1;
+  const arr=S.chunks[ent.k]; const i=arr.findIndex(x=>x.id===c.id); arr[i]=nc; IDX.set(nc.id,{c:nc,k:ent.k});
+  ts.a++; ts.t=now; if(wasNew){ ts.n++; ts.nb=ts.nb||{}; ts.nb[c.d]=(ts.nb[c.d]||0)+1; } else ts.r++;
+  session.turn++; session.doneCount++;
+  commit([ent.k,'meta']); nextCard(); render();
+}
+function undo(){
+  const u=undoStack.pop(); if(!u) return;
+  const arr=S.chunks[u.key]; const i=arr.findIndex(x=>x.id===u.card.id); if(i<0) return;
+  u.card.mod=Date.now(); arr[i]=u.card; IDX.set(u.card.id,{c:u.card,k:u.key});
+  S.meta.stats[todayKey()]=u.stat; u.stat.t=Date.now(); session.turn=u.turn; session.doneCount=Math.max(0,session.doneCount-1);
+  session.cur=u.card; revealed=false; commit([u.key,'meta']); render(); toast('한 장 되돌렸어요');
+}
+
+/* ================= 발음 ================= */
+let voice=null;
+function pickVoice(){ try{ const vs=speechSynthesis.getVoices(); voice=vs.find(v=>/en[-_]US/i.test(v.lang)&&/Samantha|Google US|Alex|Ava/i.test(v.name))||vs.find(v=>/en[-_]US/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null; }catch(e){} }
+try{ pickVoice(); speechSynthesis.onvoiceschanged=pickVoice; }catch(e){}
+function say(text){
+  try{ const t=String(text||'').split('\n')[0].replace(/\(.*?\)|\[.*?\]/g,'').trim(); if(!t) return;
+    speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang='en-US'; if(voice) u.voice=voice; u.rate=S.meta.settings.rate||0.9; speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ================= 화면 ================= */
+let tab='home', listQ='', listDeck='', openId=null;
+function render(){
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===tab));
+  const v=$('#view');
+  if(tab==='home') v.innerHTML=session?studyHTML():homeHTML();
+  else if(tab==='list') v.innerHTML=listHTML();
+  else if(tab==='import') v.innerHTML=importHTML();
+  else v.innerHTML=setHTML();
+}
+function homeHTML(){
+  const ts=todayStat(); const decks=S.meta.decks;
+  let h='<div class="card"><div class="sec-t">오늘</div><div class="today"><div>새로 외움<b>'+ts.n+'</b></div><div>복습<b>'+ts.r+'</b></div><div>연속 공부<b>'+streak()+'일</b></div></div>'+barsHTML()+'</div>';
+  h+='<div class="card"><div class="between"><div class="sec-t" style="margin:0">단어장</div><span class="note"><span class="c-new">새 카드</span> · <span class="c-learn">학습 중</span> · <span class="c-rev">복습</span></span></div>';
+  if(!decks.length) h+='<p class="empty">아직 단어장이 없어요.<br><button class="btn pri" data-a="tab" data-v="import" style="margin-top:10px">Anki 단어 가져오기</button></p>';
+  decks.forEach(d=>{
+    const c=counts(d.id), total=deckCards(d.id).length, any=c.n+c.l+c.r;
+    h+='<div class="deck"><div class="nm">'+esc(d.name)+'<small>전체 '+total+'개</small></div><div class="cnt"><span class="c-new">'+c.n+'</span><span class="c-learn">'+c.l+'</span><span class="c-rev">'+c.r+'</span></div>'+
+      '<button class="btn '+(any?'pri':'')+'" data-a="study" data-v="'+d.id+'"'+(any?'':' disabled')+'>공부</button></div>';
+  });
+  if(decks.length) h+='<div class="row" style="margin-top:12px"><button class="btn sm" data-a="studyrev" data-v="'+(decks[0]||{}).id+'">뜻 보고 단어 맞히기</button><span class="note">← 거꾸로 공부 (첫 단어장)</span></div>';
+  h+='</div>';
+  return h;
+}
+function streak(){ let n=0; const d=new Date(); for(;;){ const s=S.meta.stats[keyOf(d)]; if(s&&s.a>0){ n++; d.setDate(d.getDate()-1); } else { if(n===0&&keyOf(d)===todayKey()){ d.setDate(d.getDate()-1); continue; } break; } if(n>3650) break; } return n; }
+function barsHTML(){
+  const days=[]; const d=new Date(); d.setDate(d.getDate()-6);
+  for(let i=0;i<7;i++){ const k=keyOf(d); days.push({k,a:(S.meta.stats[k]||{}).a||0,w:'일월화수목금토'[d.getDay()]}); d.setDate(d.getDate()+1); }
+  const mx=Math.max(10,...days.map(x=>x.a));
+  return '<div class="bars">'+days.map(x=>'<div class="b'+(x.k===todayKey()?' t':'')+'"><span>'+(x.a||'')+'</span><i style="height:'+(x.a/mx*100)+'%"></i><span>'+x.w+'</span></div>').join('')+'</div>';
+}
+function studyHTML(){
+  const c=session.cur, d=deckById(session.deck);
+  const cnt=counts(session.deck);
+  let h='<div class="study"><div class="sbar"><button class="btn sm" data-a="endstudy">← 그만하기</button><div class="cnt"><span class="c-new">'+cnt.n+'</span><span class="c-learn">'+cnt.l+'</span><span class="c-rev">'+cnt.r+'</span></div><button class="btn sm" data-a="undo"'+(undoStack.length?'':' disabled')+'>↶ 되돌리기</button></div>';
+  if(!c){
+    const now=Date.now(); const cs=session.deck?deckCards(session.deck):allCards();
+    const wait=cs.filter(x=>(x.s==='l'||x.s==='rl')&&x.due<tomorrow()).sort((a,b)=>a.due-b.due)[0];
+    h+='<div class="flash done"><b>'+(wait?'잠깐 쉬어요 ☕':'오늘 공부 끝! 🎉')+'</b><span class="note">'+(wait?'학습 중인 카드가 '+Math.max(1,Math.round((wait.due-now)/60000))+'분 뒤에 다시 나와요.':'이번에 '+session.doneCount+'장 공부했어요. 내일 또 만나요.')+'</span>'+
+      (wait?'<button class="btn pink" data-a="refresh" style="margin-top:12px">다시 확인</button>':'')+'</div></div>';
+    return h;
+  }
+  const front=session.reverse?c.b:c.f, back=session.reverse?c.f:c.b;
+  const tag=c.s==='n'?'<span class="tag t-n">새 카드</span>':(c.s==='r'?'<span class="tag t-r">복습</span>':'<span class="tag t-l">학습 중</span>');
+  h+='<div class="flash" data-a="reveal"><div>'+tag+(d?'<span class="note" style="margin-left:6px">'+esc(d.name)+'</span>':'')+'</div>'+
+     '<div class="front'+(String(front).length>24?' small':'')+'">'+esc(front)+'</div>'+
+     (!session.reverse?'<button class="say" data-a="say" aria-label="발음 듣기">'+SVG_SPK+'</button>':'');
+  if(revealed){
+    h+='<div class="hr"></div><div class="back">'+esc(back)+'</div>'+(session.reverse?'<button class="say" data-a="say" aria-label="발음 듣기">'+SVG_SPK+'</button>':'')+(c.x?'<div class="extra">'+esc(c.x)+'</div>':'');
+  } else h+='<span class="note">카드를 누르거나 아래 버튼으로 정답 보기</span>';
+  h+='</div>';
+  if(!revealed) h+='<button class="show" data-a="reveal">정답 보기</button>';
+  else{
+    const now=Date.now(); const lab=g=>fmtNext(schedule(c,g,now),now);
+    h+='<div class="grade"><button class="g1" data-a="ans" data-v="1">다시<small>'+lab(1)+'</small></button><button class="g2" data-a="ans" data-v="2">어려움<small>'+lab(2)+'</small></button><button class="g3" data-a="ans" data-v="3">알맞음<small>'+lab(3)+'</small></button><button class="g4" data-a="ans" data-v="4">쉬움<small>'+lab(4)+'</small></button></div>';
+  }
+  h+='<div class="row" style="justify-content:space-between"><span class="note">오늘 '+session.doneCount+'장째</span><button class="btn sm ghost" data-a="editcard" data-v="'+c.id+'">카드 수정</button></div></div>';
+  return h;
+}
+function stateTag(c){
+  if(c.s==='n') return '<span class="tag t-n">새</span>';
+  if(c.s==='r') return '<span class="tag t-r">'+c.ivl+'일</span>';
+  return '<span class="tag t-l">학습 중</span>';
+}
+function listHTML(){
+  const q=listQ.trim().toLowerCase();
+  let cs=allCards(); if(listDeck) cs=cs.filter(c=>c.d===listDeck);
+  if(q) cs=cs.filter(c=>(c.f+'\n'+c.b+'\n'+(c.x||'')).toLowerCase().includes(q));
+  const total=cs.length; cs=cs.slice(0,300);
+  let h='<div class="card"><div class="row" style="margin-bottom:10px"><input class="search" id="q" type="text" placeholder="단어·뜻 검색" value="'+esc(listQ)+'" style="flex:1;min-width:160px"><select id="ld"><option value="">모든 단어장</option>'+S.meta.decks.map(d=>'<option value="'+d.id+'"'+(d.id===listDeck?' selected':'')+'>'+esc(d.name)+'</option>').join('')+'</select></div>'+
+    '<div class="between"><span class="note">'+total+'개'+(total>300?' (앞 300개만 표시 — 검색해 보세요)':'')+'</span><button class="btn sm pri" data-a="addcard">＋ 단어 추가</button></div><ul class="wl">';
+  cs.forEach(c=>{ h+='<li data-a="editcard" data-v="'+c.id+'"><div class="w">'+esc(c.f)+stateTag(c)+'</div><div class="m">'+esc(String(c.b).replace(/\n/g,' · '))+'</div></li>'; });
+  if(!total) h+='<li class="empty" style="cursor:default">단어가 없어요</li>';
+  return h+'</ul></div>';
+}
+/* ---- 가져오기 ---- */
+let imp=null; // {rows, cols, map[], deckName, strip}
+function importHTML(){
+  let h='<div class="card"><div class="sec-t">Anki 단어 가져오기</div>'+
+    '<p class="note">Anki에서 <b>파일 → 내보내기 → 노트를 일반 텍스트로(.txt)</b>로 저장한 파일을 고르거나, 내용을 붙여넣으세요. 엑셀에서 복사한 표(단어 ⇥ 뜻)도 돼요.</p>'+
+    '<div class="row"><label class="btn pink" style="cursor:pointer">파일 고르기<input type="file" id="impFile" accept=".txt,.tsv,.csv,text/plain" hidden></label><span class="note">또는 아래에 붙여넣기</span></div>'+
+    '<textarea id="impText" placeholder="apple	사과&#10;banana	바나나" style="margin-top:10px"></textarea>'+
+    '<div class="row" style="margin-top:8px"><button class="btn" data-a="impParse">미리보기</button></div></div>';
+  if(imp){
+    const opts=['앞면 (단어)','뒷면 (뜻)','추가 (예문 등)','가져오지 않음'];
+    h+='<div class="card"><div class="sec-t">미리보기 · '+imp.rows.length+'개</div>'+
+      '<label class="f">단어장 이름</label><input type="text" id="impDeck" value="'+esc(imp.deckName)+'" style="width:100%">'+
+      '<label class="f">칸 나누기</label><table class="map"><tr>'+imp.map.map((m,i)=>'<th><select data-a="impMap" data-v="'+i+'">'+opts.map((o,j)=>'<option value="'+j+'"'+(j===m?' selected':'')+'>'+o+'</option>').join('')+'</select></th>').join('')+'</tr>'+
+      imp.rows.slice(0,5).map(r=>'<tr>'+imp.map.map((m,i)=>'<td>'+esc((r[i]||'').slice(0,80))+'</td>').join('')+'</tr>').join('')+'</table>'+
+      '<div class="row" style="margin-top:12px;justify-content:space-between"><span class="note">같은 단어장에 이미 있는 단어는 건너뛰어요.</span><button class="btn pri" data-a="impGo">'+imp.rows.length+'개 가져오기</button></div></div>';
+  }
+  return h;
+}
+function stripHTML(s){
+  return String(s).replace(/<br\s*\/?>/gi,'\n').replace(/<\/(div|p|li)>/gi,'\n').replace(/\[sound:[^\]]*\]/g,'').replace(/<[^>]+>/g,'')
+    .replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'")
+    .replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+}
+function parseDelimited(text){
+  const lines=text.replace(/\r\n?/g,'\n'); let sep='\t', html=true;
+  const head=[]; const body=lines.split('\n').filter(l=>{ if(l.startsWith('#')){ head.push(l); return false; } return true; }).join('\n');
+  head.forEach(l=>{ const m=l.match(/^#separator:(.+)$/i); if(m){ const v=m[1].trim().toLowerCase(); sep=v==='tab'?'\t':v==='comma'?',':v==='semicolon'?';':v==='pipe'?'|':v==='space'?' ':v; } if(/^#html:false/i.test(l)) html=false; });
+  if(!head.length && !body.includes('\t') && body.includes(',')) sep=',';
+  const rows=[]; let row=[], f='', q=false;
+  for(let i=0;i<body.length;i++){
+    const ch=body[i];
+    if(q){ if(ch==='"'){ if(body[i+1]==='"'){ f+='"'; i++; } else q=false; } else f+=ch; }
+    else if(ch==='"'&&f==='') q=true;
+    else if(ch===sep){ row.push(f); f=''; }
+    else if(ch==='\n'){ row.push(f); rows.push(row); row=[]; f=''; }
+    else f+=ch;
+  }
+  if(f!==''||row.length){ row.push(f); rows.push(row); }
+  return rows.map(r=>r.map(x=>html?stripHTML(x):x.trim())).filter(r=>r.some(x=>x));
+}
+function prepImport(text,name){
+  const rows=parseDelimited(text);
+  if(!rows.length){ toast('읽을 수 있는 단어가 없어요'); return; }
+  const n=Math.max(...rows.map(r=>r.length));
+  const map=[]; for(let i=0;i<n;i++) map.push(i===0?0:i===1?1:2);
+  imp={rows,map,deckName:name||'토익 단어'}; render();
+}
+function doImport(){
+  const name=($('#impDeck').value||'').trim()||'단어장';
+  let d=S.meta.decks.find(x=>x.name===name);
+  if(!d){ d={id:uid(),name}; S.meta.decks.push(d); }
+  const exist=new Set(deckCards(d.id).map(c=>c.f.trim().toLowerCase()));
+  let ord=deckCards(d.id).reduce((m,c)=>Math.max(m,c.o||0),0);
+  const now=Date.now(); const add=[];
+  imp.rows.forEach(r=>{
+    const pick=k=>imp.map.map((m,i)=>m===k?(r[i]||'').trim():'').filter(Boolean).join('\n');
+    const f=pick(0), b=pick(1), x=pick(2);
+    if(!f||exist.has(f.toLowerCase())) return; exist.add(f.toLowerCase());
+    add.push({id:uid(),d:d.id,f,b,x,s:'n',o:++ord,mod:now});
+  });
+  const keys=addCards(add,d.id);
+  commit(['meta',...keys]); imp=null; tab='home'; render();
+  toast(add.length+'개를 "'+name+'"에 넣었어요');
+}
+function addCards(list,deckId){
+  const keys=new Set();
+  const ks=Object.keys(S.chunks).filter(k=>k.startsWith('c-'+deckId+'-')).sort((a,b)=>(+a.split('-').pop())-(+b.split('-').pop()));
+  let k=ks[ks.length-1], n=k?+k.split('-').pop():-1;
+  list.forEach(c=>{
+    if(!k||(S.chunks[k]||[]).length>=CHUNK){ n++; k='c-'+deckId+'-'+n; S.chunks[k]=[]; }
+    S.chunks[k].push(c); IDX.set(c.id,{c,k}); keys.add(k);
+  });
+  return [...keys];
+}
+function setHTML(){
+  const st=S.meta.settings;
+  let h='<div class="card"><div class="sec-t">공부 설정</div>'+
+    '<div class="between"><span>하루 새 카드 수 (단어장마다)</span><input type="number" min="0" max="500" value="'+st.newPerDay+'" data-a="newPerDay" style="width:90px"></div>'+
+    '<div class="between" style="margin-top:10px"><label class="sw"><input type="checkbox" data-a="autoSay"'+(st.autoSay?' checked':'')+'> 카드가 나오면 자동으로 발음 듣기</label></div>'+
+    '<div class="between" style="margin-top:10px"><span>발음 속도</span><select data-a="rate">'+[0.7,0.8,0.9,1,1.1].map(r=>'<option value="'+r+'"'+(r==st.rate?' selected':'')+'>'+r+'배</option>').join('')+'</select></div>'+
+    '<p class="note">버튼 뜻: <b>다시</b> 몰랐어요(곧 다시) · <b>어려움</b> 겨우 기억 · <b>알맞음</b> 기억남 · <b>쉬움</b> 너무 쉬움(오래 뒤에)</p></div>';
+  h+='<div class="card"><div class="sec-t">단어장 관리</div>'+(S.meta.decks.length?S.meta.decks.map(d=>'<div class="deck"><input type="text" value="'+esc(d.name)+'" data-a="deckName" data-v="'+d.id+'" style="flex:1"><span class="note">'+deckCards(d.id).length+'개</span><button class="btn sm danger" data-a="deckDel" data-v="'+d.id+'">삭제</button></div>').join(''):'<p class="note">단어장이 없어요.</p>')+'</div>';
+  h+='<div class="card"><div class="sec-t">계정</div>'+(account?'<p class="note">'+esc(account.email)+' 로 로그인됨 — 순공 기록표와 같은 계정이에요.</p><button class="btn sm" data-a="logout">로그아웃</button>':'<p class="note">로그인 전이라 이 기기에만 저장돼요.</p>')+'</div>';
+  return h;
+}
+
+/* ================= 모달 (카드 편집) ================= */
+function modal(html){ $('#mbox').innerHTML=html; $('#modal').style.display='flex'; }
+function closeModal(){ $('#modal').style.display='none'; $('#mbox').innerHTML=''; }
+let editId=null, delArm=null;
+function openEdit(id){
+  editId=id; delArm=null;
+  const c=id?IDX.get(id).c:{f:'',b:'',x:'',d:(listDeck||(S.meta.decks[0]||{}).id||'')};
+  modal('<div class="between"><div class="sec-t" style="margin:0">'+(id?'카드 수정':'단어 추가')+'</div><button class="btn sm" data-a="mclose">닫기</button></div>'+
+    '<label class="f">단어장</label><select id="eDeck" style="width:100%">'+S.meta.decks.map(d=>'<option value="'+d.id+'"'+(d.id===c.d?' selected':'')+'>'+esc(d.name)+'</option>').join('')+'<option value="__new">＋ 새 단어장</option></select>'+
+    '<label class="f">앞면 (단어)</label><textarea id="eF" style="min-height:56px">'+esc(c.f)+'</textarea>'+
+    '<label class="f">뒷면 (뜻)</label><textarea id="eB" style="min-height:56px">'+esc(c.b)+'</textarea>'+
+    '<label class="f">추가 (예문 등)</label><textarea id="eX">'+esc(c.x||'')+'</textarea>'+
+    (id?'<p class="note">상태: '+stateTag(c)+(c.reps?' · 공부 '+c.reps+'번':'')+(c.lapses?' · 틀림 '+c.lapses+'번':'')+'</p>':'')+
+    '<div class="between" style="margin-top:12px">'+(id?'<span class="row"><button class="btn sm danger" data-a="eDel">삭제</button><button class="btn sm" data-a="eReset">새 카드로 되돌리기</button></span>':'<span></span>')+'<button class="btn pri" data-a="eSave">저장</button></div>');
+}
+function saveEdit(){
+  const f=$('#eF').value.trim(), b=$('#eB').value.trim(), x=$('#eX').value.trim(); let dk=$('#eDeck').value;
+  if(!f){ toast('앞면을 입력해 주세요'); return; }
+  if(dk==='__new'||!dk){ const d={id:uid(),name:'내 단어장'}; S.meta.decks.push(d); dk=d.id; }
+  const now=Date.now();
+  if(editId){
+    const e=IDX.get(editId); const arr=S.chunks[e.k]; const i=arr.findIndex(c=>c.id===editId);
+    if(dk!==e.c.d){ arr[i]=Object.assign({},e.c,{del:true,mod:now}); const nc=Object.assign({},e.c,{id:uid(),d:dk,f,b,x,mod:now}); const keys=addCards([nc],dk); commit(['meta',e.k,...keys]); }
+    else { arr[i]=Object.assign({},e.c,{f,b,x,mod:now}); IDX.set(editId,{c:arr[i],k:e.k}); if(session&&session.cur&&session.cur.id===editId) session.cur=arr[i]; commit([e.k]); }
+  } else {
+    const ord=deckCards(dk).reduce((m,c)=>Math.max(m,c.o||0),0)+1;
+    const keys=addCards([{id:uid(),d:dk,f,b,x,s:'n',o:ord,mod:now}],dk); commit(['meta',...keys]);
+  }
+  reindex(); closeModal(); render(); toast('저장했어요');
+}
+
+/* ================= 토스트 ================= */
+let tt=null;
+function toast(m){ const t=$('#toast'); t.innerHTML='<span>'+esc(m)+'</span>'; t.style.display='flex'; clearTimeout(tt); tt=setTimeout(()=>t.style.display='none',2600); }
+
+/* ================= 이벤트 ================= */
+let deckDelArm=null;
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]'); if(!b) return;
+  if(b.tagName==='SELECT'||(b.tagName==='INPUT'&&b.type!=='button')) return;
+  const a=b.dataset.a, v=b.dataset.v;
+  switch(a){
+    case 'tab': if(session&&v!=='home'){} tab=v; render(); break;
+    case 'study': startSession(v,false); break;
+    case 'studyrev': startSession(v,true); break;
+    case 'endstudy': session=null; flushAll(); render(); break;
+    case 'refresh': nextCard(); render(); break;
+    case 'reveal': if(!revealed&&session&&session.cur){ revealed=true; if(session.reverse&&S.meta.settings.autoSay) say(session.cur.f); render(); } break;
+    case 'say': e.stopPropagation(); if(session&&session.cur) say(session.cur.f); break;
+    case 'ans': answer(+v); break;
+    case 'undo': undo(); break;
+    case 'editcard': openEdit(v); break;
+    case 'addcard': openEdit(null); break;
+    case 'mclose': closeModal(); break;
+    case 'eSave': saveEdit(); break;
+    case 'eDel': {
+      if(delArm!==editId){ delArm=editId; b.textContent='한 번 더 누르면 삭제'; break; }
+      const en=IDX.get(editId); const arr=S.chunks[en.k]; const i=arr.findIndex(c=>c.id===editId); arr[i]=Object.assign({},en.c,{del:true,mod:Date.now()});
+      reindex(); if(session&&session.cur&&session.cur.id===editId) nextCard(); commit([en.k]); closeModal(); render(); toast('삭제했어요'); break; }
+    case 'eReset': { const en=IDX.get(editId); const arr=S.chunks[en.k]; const i=arr.findIndex(c=>c.id===editId); arr[i]=Object.assign({},en.c,{s:'n',due:0,ivl:0,step:0,mod:Date.now()}); reindex(); commit([en.k]); closeModal(); render(); toast('새 카드로 되돌렸어요'); break; }
+    case 'impParse': { const t=$('#impText').value; if(!t.trim()){ toast('붙여넣은 내용이 없어요'); break; } prepImport(t,''); break; }
+    case 'impGo': doImport(); break;
+    case 'deckDel': {
+      if(deckDelArm!==v){ deckDelArm=v; b.textContent='정말 삭제? (카드 전부)'; break; }
+      const now=Date.now(); const keys=[];
+      for(const k in S.chunks){ if(k.startsWith('c-'+v+'-')){ S.chunks[k]=S.chunks[k].map(c=>Object.assign({},c,{del:true,mod:now})); keys.push(k); } }
+      S.meta.decks=S.meta.decks.filter(d=>d.id!==v); reindex(); commit(['meta',...keys]); render(); toast('단어장을 삭제했어요'); break; }
+    case 'logout': if(account&&account.logout) account.logout(); break;
+  }
+});
+document.addEventListener('change',e=>{
+  const el=e.target, a=el.dataset.a, v=el.dataset.v, st=S.meta.settings;
+  if(el.id==='impFile'){ const f=el.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>prepImport(String(r.result),f.name.replace(/\.(txt|tsv|csv)$/i,'')); r.readAsText(f,'utf-8'); return; }
+  if(el.id==='ld'){ listDeck=el.value; render(); return; }
+  if(el.id==='impDeck'&&imp){ imp.deckName=el.value; return; }
+  switch(a){
+    case 'impMap': imp.map[+v]=+el.value; render(); break;
+    case 'newPerDay': st.newPerDay=Math.max(0,Math.min(500,+el.value||0)); commit(['meta']); break;
+    case 'autoSay': st.autoSay=el.checked; commit(['meta']); break;
+    case 'rate': st.rate=+el.value; commit(['meta']); say('Hello'); break;
+    case 'deckName': { const d=deckById(v); if(d&&el.value.trim()){ d.name=el.value.trim(); commit(['meta']); } break; }
+  }
+});
+let qT=null;
+document.addEventListener('input',e=>{ if(e.target.id==='q'){ listQ=e.target.value; clearTimeout(qT); qT=setTimeout(()=>{ const pos=e.target.selectionStart; render(); const q=$('#q'); if(q){ q.focus(); try{q.setSelectionRange(pos,pos);}catch(x){} } },250); } });
+document.addEventListener('keydown',e=>{
+  if(tab!=='home'||!session||!session.cur) return;
+  if(/INPUT|TEXTAREA|SELECT/.test((e.target.tagName||''))||$('#modal').style.display==='flex') return;
+  if(!revealed&&(e.key===' '||e.key==='Enter')){ e.preventDefault(); revealed=true; render(); }
+  else if(revealed&&/^[1-4]$/.test(e.key)) answer(+e.key);
+  else if(revealed&&(e.key===' '||e.key==='Enter')){ e.preventDefault(); answer(3); }
+  else if(e.key==='z'&&(e.metaKey||e.ctrlKey)) undo();
+});
+
+render();
+window.SG={attachSync,detachSync,resetLocal,setStatus,setAccount:a=>{account=a; if(tab==='set') render();}};
+window.__v={parse:parseDelimited,schedule,S:()=>S,prepImport,doImport:()=>doImport()};
+})();
+</script>
+<script type="module">
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBzfWkPQTvmaRL9sqVtiPRdtVmd-ZXuXBM",
+  authDomain: "satuerdaynight-e00f7.firebaseapp.com",
+  projectId: "satuerdaynight-e00f7",
+  storageBucket: "satuerdaynight-e00f7.firebasestorage.app",
+  messagingSenderId: "984115760645",
+  appId: "1:984115760645:web:70bf86d68a816495d4566c"
+};
+const SG = window.SG; const $ = s => document.querySelector(s);
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+const V = '10.12.4', base = 'https://www.gstatic.com/firebasejs/' + V + '/';
+try {
+  const { initializeApp } = await import(base + 'firebase-app.js');
+  const A = await import(base + 'firebase-auth.js');
+  const F = await import(base + 'firebase-firestore.js');
+  const app = initializeApp(FIREBASE_CONFIG);
+  const auth = A.getAuth(app);
+  let fs;
+  try { fs = F.initializeFirestore(app, { localCache: F.persistentLocalCache({ tabManager: F.persistentMultipleTabManager() }) }); }
+  catch (e) { fs = F.getFirestore(app); }
+  const ERR = {
+    'auth/invalid-credential': '이메일 또는 비밀번호가 맞지 않아요.', 'auth/wrong-password': '비밀번호가 맞지 않아요.',
+    'auth/user-not-found': '가입되지 않은 이메일이에요.', 'auth/email-already-in-use': '이미 가입된 이메일이에요. 로그인해 주세요.',
+    'auth/weak-password': '비밀번호는 6자 이상이어야 해요.', 'auth/invalid-email': '이메일 형식을 확인해 주세요.',
+    'auth/network-request-failed': '인터넷 연결을 확인해 주세요.', 'auth/too-many-requests': '시도가 너무 많아요. 잠시 후 다시 해 주세요.',
+    'auth/missing-email': '이메일을 먼저 입력해 주세요.'
+  };
+  const msg = (t, ok) => { const m = $('#lgMsg'); m.textContent = t || ''; m.className = 'msg' + (ok ? ' ok' : ''); };
+  let signup = false;
+  $('#lgMode').onclick = () => { signup = !signup; $('#lgGo').textContent = signup ? '가입하고 시작하기' : '로그인'; $('#lgMode').textContent = signup ? '이미 계정이 있어요 (로그인)' : '처음이에요 (가입하기)'; msg(''); };
+  $('#lgReset').onclick = async () => { try { await A.sendPasswordResetEmail(auth, $('#lgEmail').value.trim()); msg('비밀번호 재설정 메일을 보냈어요.', true); } catch (e) { msg(ERR[e.code] || '메일을 보내지 못했어요.'); } };
+  $('#loginForm').onsubmit = async ev => {
+    ev.preventDefault(); const em = $('#lgEmail').value.trim(), pw = $('#lgPw').value; $('#lgGo').disabled = true; msg('');
+    try { signup ? await A.createUserWithEmailAndPassword(auth, em, pw) : await A.signInWithEmailAndPassword(auth, em, pw); }
+    catch (e) { msg(ERR[e.code] || ('로그인하지 못했어요 (' + (e.code || '') + ')')); }
+    $('#lgGo').disabled = false;
+  };
+  A.onAuthStateChanged(auth, user => {
+    if (user) {
+      $('#login').style.display = 'none';
+      const col = F.collection(fs, 'users', user.uid, 'vocab');
+      SG.attachSync({
+        doc: k => ({ set: b => F.setDoc(F.doc(fs, 'users', user.uid, 'vocab', k), b) }),
+        onSnapshot: (next, err) => F.onSnapshot(col, { includeMetadataChanges: true }, next, err)
+      });
+      SG.setAccount({ email: user.email, logout: async () => { await A.signOut(auth); } });
+    } else {
+      SG.detachSync(); SG.setAccount(null); SG.resetLocal();
+      SG.setStatus('로그인 필요'); $('#login').style.display = 'flex';
+    }
+  });
+} catch (e) {
+  SG.setStatus('오프라인 — 이 기기에 저장 중');
+}
+</script>
+</body>
+</html>
