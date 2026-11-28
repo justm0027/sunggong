@@ -206,7 +206,11 @@ body.wk-wide .wrap{max-width:1180px}
 .wb.tiny .wb-t{-webkit-line-clamp:1;font-size:12px}
 .wb-time{font-size:10.5px;color:var(--sub);font-family:var(--mono)}
 .wb-rs{position:absolute;left:0;right:0;bottom:0;height:8px;cursor:ns-resize}
-@media (hover:none){.wb-rs{height:16px}.wb-rs::after{content:"";position:absolute;left:50%;bottom:4px;width:24px;height:4px;margin-left:-12px;border-radius:2px;background:rgba(60,30,90,.32)}.wb.tiny .wb-rs{height:10px}.wb.tiny .wb-rs::after{bottom:2px;height:3px}}
+@media (hover:none){.wb-rs{display:none}}
+.wb.sel{overflow:visible;z-index:7;outline:2px solid var(--acc);outline-offset:1px;touch-action:none}
+.wh{position:absolute;left:50%;width:48px;height:34px;margin-left:-24px;z-index:8;touch-action:none;cursor:ns-resize}
+.wh::after{content:"";position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:#fff;border:3px solid var(--acc);box-shadow:0 1px 4px rgba(60,30,90,.35);box-sizing:border-box}
+.wh-t{top:-18px;left:auto;right:-14px;margin-left:0}.wh-b{bottom:-18px;left:-10px;margin-left:0}
 .wb{-webkit-touch-callout:none}
 .wb.held{outline:2px solid var(--acc);outline-offset:1px}
 .wb.dragging{opacity:.88;z-index:6;box-shadow:0 6px 16px rgba(60,30,90,.25)}
@@ -299,7 +303,7 @@ body.wk-wide .wrap{max-width:1180px}
       <button class="btn sm ghost" data-a="wearly" id="wkEarly">새벽 시간 보기</button>
     </div>
     <div class="wk-scroll" id="wkScroll"></div>
-    <p class="wk-hint">빈 칸을 누르면 그 시간에 계획을 추가하고, 블록을 누르면 수정·삭제할 수 있어요. 휴대폰에서는 표를 옆으로 밀어 다른 요일을 봐요. 블록을 꾹 누른 채 끌면 옮겨지고, 블록 아래 손잡이를 꾹 누른 채 끌면 길이가 바뀌어요(마우스는 바로 끌면 돼요). 계획은 실제 기록·순공시간에 더해지지 않아요.</p>
+    <p class="wk-hint">빈 칸을 누르면 그 시간에 계획을 추가하고, 블록을 누르면 수정·삭제할 수 있어요. 휴대폰에서는 표를 옆으로 밀어 다른 요일을 봐요. 블록을 꾹 누르면 선택돼요. 선택된 블록은 바로 끌어서 옮기고, 위·아래 동그라미를 끌어 시작·종료 시간을 바꿔요. 빈 곳을 누르면 선택이 풀려요(마우스는 바로 끌면 돼요). 계획은 실제 기록·순공시간에 더해지지 않아요.</p>
     <div class="card" id="wkActual"></div>
     <div id="wkMemo"></div>
   </section>
@@ -953,8 +957,9 @@ function renderWeekGrid(){
     layoutDay((w.blocks||[]).filter(b=>b.d===i)).forEach(o=>{
       const b=o.b, top=(b.s-A)/60*HH, ht=Math.max(15,(b.e-b.s)/60*HH-2), col=blkColor(b);
       const title=b.t||(b.cat?catName(b.cat):'계획');
-      h+='<div class="wb'+(ht<30?' tiny':'')+'" data-wb="'+b.id+'" role="button" tabindex="0" aria-label="'+esc(WKD[b.d]+' '+fmt(b.s)+'부터 '+fmtEnd(b.e)+'까지 '+title)+'" style="top:'+top+'px;height:'+ht+'px;left:calc('+(o.c*100/o.n)+'% + 2px);width:calc('+(100/o.n)+'% - 4px);background:'+hexRgba(col,.18)+';border-left-color:'+col+'">'+
-        '<span class="wb-t">'+esc(title)+'</span>'+(ht>=30?'<span class="wb-time">'+fmt(b.s)+'–'+fmtEnd(b.e)+'</span>':'')+'<i class="wb-rs" aria-hidden="true"></i></div>';
+      const sel=b.id===wkSel;
+      h+='<div class="wb'+(ht<30?' tiny':'')+(sel?' sel':'')+'" data-wb="'+b.id+'" role="button" tabindex="0" aria-label="'+esc(WKD[b.d]+' '+fmt(b.s)+'부터 '+fmtEnd(b.e)+'까지 '+title)+'" style="top:'+top+'px;height:'+ht+'px;left:calc('+(o.c*100/o.n)+'% + 2px);width:calc('+(100/o.n)+'% - 4px);background:'+hexRgba(col,.18)+';border-left-color:'+col+'">'+
+        '<span class="wb-t">'+esc(title)+'</span>'+(ht>=30?'<span class="wb-time">'+fmt(b.s)+'–'+fmtEnd(b.e)+'</span>':'')+'<i class="wb-rs" aria-hidden="true"></i>'+(sel?'<i class="wh wh-t" aria-hidden="true"></i><i class="wh wh-b" aria-hidden="true"></i>':'')+'</div>';
     });
     if(k===tk){ const nm=rawNow(); if(nm>=A&&nm<Z) h+='<div class="wk-now" style="top:'+((nm-A)/60*HH)+'px"></div>'; }
     h+='</div>';
@@ -1023,13 +1028,15 @@ function saveBlock(){
   toast((i>=0?'수정했어요: ':'추가했어요: ')+WKD[nb.d]+' '+fmt(nb.s)+'–'+fmtEnd(nb.e));
 }
 /* 마우스 드래그 (넓은 화면 전용, 휴대폰은 편집 창 사용) */
-let wkDrag=null, wkSuppress=0;
+let wkDrag=null, wkSuppress=0, wkSel=null;
+function dragTip(text){ const t=$('#toast'); t.innerHTML='<span>'+esc(text)+'</span>'; t.style.display='flex'; clearTimeout(tt); }
 function setupWeekGrid(){
   const sc=$('#wkScroll');
   sc.addEventListener('click',e=>{
     if(Date.now()<wkSuppress) return;
-    const bl=e.target.closest('.wb'); if(bl){ openBlock(bl.dataset.wb); return; }
+    const bl=e.target.closest('.wb'); if(bl){ if(bl.dataset.wb!==wkSel&&wkSel){ wkSel=null; renderWeekGrid(); } openBlock(bl.dataset.wb); return; }
     const col=e.target.closest('.wk-col'); if(!col) return;
+    if(wkSel){ wkSel=null; renderWeekGrid(); return; }
     const r=col.getBoundingClientRect(), A=+sc.dataset.a0;
     let m=A+Math.floor((e.clientY-r.top)/HH*2)*30; m=Math.max(0,Math.min(1410,m));
     openBlock(null,{d:+col.dataset.wd,s:m,e:Math.min(1440,m+60)});
@@ -1042,13 +1049,16 @@ function setupWeekGrid(){
     const bl=e.target.closest('.wb'); if(!bl) return;
     const b=(getWeek(wkMon).blocks||[]).find(x=>x.id===bl.dataset.wb); if(!b) return;
     const c0=sc.querySelector('.wk-col');
-    const st={el:bl,b:Object.assign({},b),mode:e.target.classList.contains('wb-rs')?'rs':'mv',x:e.clientX,y:e.clientY,moved:false,colW:c0.getBoundingClientRect().width,dd:0,dm:0,pid:e.pointerId};
-    if(e.pointerType==='mouse'){ wkDrag=st; try{ bl.setPointerCapture(e.pointerId); }catch(x){} return; }
+    const hd=e.target.closest('.wh');
+    const mode=hd?(hd.classList.contains('wh-t')?'rt':'rs'):(e.target.classList.contains('wb-rs')?'rs':'mv');
+    const st={el:bl,b:Object.assign({},b),mode,x:e.clientX,y:e.clientY,moved:false,colW:c0.getBoundingClientRect().width,dd:0,dm:0,pid:e.pointerId};
+    /* 마우스, 또는 이미 선택된 블록(동그라미 손잡이 포함)은 바로 끌기 */
+    if(e.pointerType==='mouse'||bl.dataset.wb===wkSel){ st.touch=e.pointerType!=='mouse'; wkDrag=st; try{ bl.setPointerCapture(e.pointerId); }catch(x){} return; }
     /* 터치(아이패드·휴대폰): 꾹 누르면(0.4초) 옮기기·늘리기 시작, 그냥 밀면 화면 스크롤 */
     cancelPress(); wkPress=st;
     wkPressT=setTimeout(()=>{
       if(wkPress!==st) return; wkPress=null;
-      st.touch=true; st.x=st.lx??st.x; st.y=st.ly??st.y; wkDrag=st;
+      st.touch=true; st.lp=true; st.x=st.lx??st.x; st.y=st.ly??st.y; wkDrag=st;
       bl.classList.add('dragging','held'); try{ bl.setPointerCapture(st.pid); }catch(x){}
       try{ if(navigator.vibrate) navigator.vibrate(12); }catch(x){}
       const tm=bl.querySelector('.wb-time'); if(tm) tm.textContent=st.mode==='rs'?'아래로 끌어 길이 조절':'끌어서 옮기기';
@@ -1067,20 +1077,26 @@ function setupWeekGrid(){
       const m=Math.max(-d.b.s,Math.min(1440-d.b.e,dm)); d.dd=dd; d.dm=m;
       d.el.style.transform='translate('+(dd*d.colW)+'px,'+(m/60*HH)+'px)';
       const tm=d.el.querySelector('.wb-time'); if(tm) tm.textContent=WKD[d.b.d+dd]+' '+fmt(d.b.s+m)+'–'+fmtEnd(d.b.e+m);
+      if(d.touch) dragTip(WKD[d.b.d+dd]+' '+fmt(d.b.s+m)+'–'+fmtEnd(d.b.e+m));
+    } else if(d.mode==='rt'){
+      const ns=Math.max(0,Math.min(d.b.e-10,d.b.s+dm)); d.dm=ns-d.b.s; const A0=+sc.dataset.a0;
+      d.el.style.top=((ns-A0)/60*HH)+'px'; d.el.style.height=Math.max(15,(d.b.e-ns)/60*HH-2)+'px';
+      const tm=d.el.querySelector('.wb-time'); if(tm) tm.textContent=fmt(ns)+'–'+fmtEnd(d.b.e);
+      dragTip('시작 '+fmt(ns)+' · '+fmt(ns)+'–'+fmtEnd(d.b.e)+' ('+dur(d.b.e-ns)+')');
     } else {
       const ne=Math.max(d.b.s+10,Math.min(1440,d.b.e+dm)); d.dm=ne-d.b.e;
       d.el.style.height=Math.max(15,(ne-d.b.s)/60*HH-2)+'px';
       const tm=d.el.querySelector('.wb-time'); if(tm) tm.textContent=fmt(d.b.s)+'–'+fmtEnd(ne);
+      if(d.touch) dragTip('종료 '+fmtEnd(ne)+' · '+fmt(d.b.s)+'–'+fmtEnd(ne)+' ('+dur(ne-d.b.s)+')');
     }
   });
   const end=()=>{
     cancelPress();
     const d=wkDrag; if(!d) return; wkDrag=null;
-    if(d.touch) wkSuppress=Date.now()+500;
-    if(!d.moved){ if(d.touch){ renderWeekGrid(); toast(d.mode==='rs'?'손잡이를 꾹 누른 채 아래·위로 끌면 길이가 바뀌어요':'꾹 누른 채 끌면 다른 요일·시간으로 옮겨져요'); } return; }
-    wkSuppress=Date.now()+500;
+    if(!d.moved){ if(d.lp){ wkSuppress=Date.now()+350; wkSel=d.b.id; renderWeekGrid(); toast('선택됐어요. 위·아래 동그라미를 끌면 시간이, 블록을 끌면 위치가 바뀌어요'); } return; }
+    wkSuppress=Date.now()+350; if(d.touch) wkSel=d.b.id;
     const w=editWeek(wkMon); const b=w.blocks.find(x=>x.id===d.b.id); if(!b){ renderWeekGrid(); return; }
-    if(d.mode==='mv'){ b.d=d.b.d+d.dd; b.s=d.b.s+d.dm; b.e=d.b.e+d.dm; } else b.e=d.b.e+d.dm;
+    if(d.mode==='mv'){ b.d=d.b.d+d.dd; b.s=d.b.s+d.dm; b.e=d.b.e+d.dm; } else if(d.mode==='rt') b.s=d.b.s+d.dm; else b.e=d.b.e+d.dm;
     if(d.dd||d.dm){ saveWeek(wkMon); toast(WKD[b.d]+' '+fmt(b.s)+'–'+fmtEnd(b.e)+'(으)로 바꿨어요'); }
     renderWeekGrid();
   };
