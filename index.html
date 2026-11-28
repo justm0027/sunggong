@@ -206,7 +206,9 @@ body.wk-wide .wrap{max-width:1180px}
 .wb.tiny .wb-t{-webkit-line-clamp:1;font-size:12px}
 .wb-time{font-size:10.5px;color:var(--sub);font-family:var(--mono)}
 .wb-rs{position:absolute;left:0;right:0;bottom:0;height:8px;cursor:ns-resize}
-@media (hover:none){.wb-rs{display:none}}
+@media (hover:none){.wb-rs{height:16px}.wb-rs::after{content:"";position:absolute;left:50%;bottom:4px;width:24px;height:4px;margin-left:-12px;border-radius:2px;background:rgba(60,30,90,.32)}.wb.tiny .wb-rs{height:10px}.wb.tiny .wb-rs::after{bottom:2px;height:3px}}
+.wb{-webkit-touch-callout:none}
+.wb.held{outline:2px solid var(--acc);outline-offset:1px}
 .wb.dragging{opacity:.88;z-index:6;box-shadow:0 6px 16px rgba(60,30,90,.25)}
 .wk-now{position:absolute;left:0;right:0;height:2px;background:#d6336c;z-index:2;pointer-events:none}
 .wk-now::before{content:"";position:absolute;left:-1px;top:-3px;width:8px;height:8px;border-radius:50%;background:#d6336c}
@@ -297,7 +299,7 @@ body.wk-wide .wrap{max-width:1180px}
       <button class="btn sm ghost" data-a="wearly" id="wkEarly">새벽 시간 보기</button>
     </div>
     <div class="wk-scroll" id="wkScroll"></div>
-    <p class="wk-hint">빈 칸을 누르면 그 시간에 계획을 추가하고, 블록을 누르면 수정·삭제할 수 있어요. 휴대폰에서는 표를 옆으로 밀어 다른 요일을 봐요. 마우스가 있는 화면에서는 블록을 끌어 옮기고, 블록 아래 끝을 끌어 길이를 바꿀 수 있어요. 계획은 실제 기록·순공시간에 더해지지 않아요.</p>
+    <p class="wk-hint">빈 칸을 누르면 그 시간에 계획을 추가하고, 블록을 누르면 수정·삭제할 수 있어요. 휴대폰에서는 표를 옆으로 밀어 다른 요일을 봐요. 블록을 꾹 누른 채 끌면 옮겨지고, 블록 아래 손잡이를 꾹 누른 채 끌면 길이가 바뀌어요(마우스는 바로 끌면 돼요). 계획은 실제 기록·순공시간에 더해지지 않아요.</p>
     <div class="card" id="wkActual"></div>
     <div id="wkMemo"></div>
   </section>
@@ -1033,17 +1035,31 @@ function setupWeekGrid(){
     openBlock(null,{d:+col.dataset.wd,s:m,e:Math.min(1440,m+60)});
   });
   sc.addEventListener('keydown',e=>{ const bl=e.target.closest&&e.target.closest('.wb'); if(bl&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); openBlock(bl.dataset.wb); } });
+  let wkPress=null, wkPressT=null;
+  const cancelPress=()=>{ clearTimeout(wkPressT); wkPress=null; };
   sc.addEventListener('pointerdown',e=>{
-    if(e.pointerType!=='mouse'||e.button!==0) return;
+    if(e.pointerType==='mouse'&&e.button!==0) return;
     const bl=e.target.closest('.wb'); if(!bl) return;
     const b=(getWeek(wkMon).blocks||[]).find(x=>x.id===bl.dataset.wb); if(!b) return;
     const c0=sc.querySelector('.wk-col');
-    wkDrag={el:bl,b:Object.assign({},b),mode:e.target.classList.contains('wb-rs')?'rs':'mv',x:e.clientX,y:e.clientY,moved:false,colW:c0.getBoundingClientRect().width,dd:0,dm:0};
-    try{ bl.setPointerCapture(e.pointerId); }catch(x){}
+    const st={el:bl,b:Object.assign({},b),mode:e.target.classList.contains('wb-rs')?'rs':'mv',x:e.clientX,y:e.clientY,moved:false,colW:c0.getBoundingClientRect().width,dd:0,dm:0,pid:e.pointerId};
+    if(e.pointerType==='mouse'){ wkDrag=st; try{ bl.setPointerCapture(e.pointerId); }catch(x){} return; }
+    /* 터치(아이패드·휴대폰): 꾹 누르면(0.4초) 옮기기·늘리기 시작, 그냥 밀면 화면 스크롤 */
+    cancelPress(); wkPress=st;
+    wkPressT=setTimeout(()=>{
+      if(wkPress!==st) return; wkPress=null;
+      st.touch=true; st.x=st.lx??st.x; st.y=st.ly??st.y; wkDrag=st;
+      bl.classList.add('dragging','held'); try{ bl.setPointerCapture(st.pid); }catch(x){}
+      try{ if(navigator.vibrate) navigator.vibrate(12); }catch(x){}
+      const tm=bl.querySelector('.wb-time'); if(tm) tm.textContent=st.mode==='rs'?'아래로 끌어 길이 조절':'끌어서 옮기기';
+    },400);
   });
+  sc.addEventListener('touchmove',e=>{ if(wkDrag&&wkDrag.touch) e.preventDefault(); },{passive:false});
+  sc.addEventListener('contextmenu',e=>{ if(e.target.closest&&e.target.closest('.wb')) e.preventDefault(); });
   sc.addEventListener('pointermove',e=>{
+    if(wkPress&&e.pointerId===wkPress.pid){ wkPress.lx=e.clientX; wkPress.ly=e.clientY; if(Math.abs(e.clientX-wkPress.x)+Math.abs(e.clientY-wkPress.y)>10) cancelPress(); return; }
     const d=wkDrag; if(!d) return; const dx=e.clientX-d.x, dy=e.clientY-d.y;
-    if(!d.moved&&Math.abs(dx)+Math.abs(dy)<6) return;
+    if(!d.moved&&Math.abs(dx)+Math.abs(dy)<(d.touch?3:6)) return;
     d.moved=true; d.el.classList.add('dragging'); e.preventDefault();
     const dm=Math.round(dy/HH*6)*10;
     if(d.mode==='mv'){
@@ -1058,8 +1074,11 @@ function setupWeekGrid(){
     }
   });
   const end=()=>{
+    cancelPress();
     const d=wkDrag; if(!d) return; wkDrag=null;
-    if(!d.moved) return; wkSuppress=Date.now()+400;
+    if(d.touch) wkSuppress=Date.now()+500;
+    if(!d.moved){ if(d.touch){ renderWeekGrid(); toast(d.mode==='rs'?'손잡이를 꾹 누른 채 아래·위로 끌면 길이가 바뀌어요':'꾹 누른 채 끌면 다른 요일·시간으로 옮겨져요'); } return; }
+    wkSuppress=Date.now()+500;
     const w=editWeek(wkMon); const b=w.blocks.find(x=>x.id===d.b.id); if(!b){ renderWeekGrid(); return; }
     if(d.mode==='mv'){ b.d=d.b.d+d.dd; b.s=d.b.s+d.dm; b.e=d.b.e+d.dm; } else b.e=d.b.e+d.dm;
     if(d.dd||d.dm){ saveWeek(wkMon); toast(WKD[b.d]+' '+fmt(b.s)+'–'+fmtEnd(b.e)+'(으)로 바꿨어요'); }
